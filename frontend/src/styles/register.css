@@ -1,0 +1,160 @@
+.register-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+    radial-gradient(circle at top left,#1e3a8a 0%,transparent 35%),
+    radial-gradient(circle at bottom right,#7c3aed 0%,transparent 35%),
+    #0b1120;
+
+    padding:40px;
+}
+
+.register-card{
+
+    width:620px;
+
+    background:#182235;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.45);
+}
+.register-header{
+
+    background:linear-gradient(
+        135deg,
+        #7c3aed,
+        #2563eb,
+        #06b6d4
+    );
+
+    padding:35px 30px;
+
+    text-align:center;
+
+    border-radius:22px 22px 0 0;
+}
+
+.register-logo{
+
+    color:#fff;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    margin-bottom:18px;
+}
+
+.register-header h2{
+
+    color:white;
+
+    font-size:34px;
+
+    font-weight:700;
+
+    margin-bottom:8px;
+}
+
+.register-header p{
+
+    color:#dbeafe;
+
+    margin:0;
+
+    font-size:16px;
+}
+/* ===== Register Inputs ===== */
+
+/* ===== Inputs ===== */
+
+.register-input{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+}
+
+.register-input .input-icon{
+
+    position:absolute;
+
+    left:16px;
+
+    color:#94a3b8;
+
+    z-index:5;
+}
+
+.register-input input,
+.register-input select{
+
+    width:100% !important;
+
+    height:54px !important;
+
+    padding-left:48px !important;
+
+    padding-right:48px !important;
+
+    background:#111827 !important;
+
+    color:white !important;
+
+    border:1px solid #334155 !important;
+
+    border-radius:12px !important;
+}
+
+.register-input input::placeholder{
+
+    color:#94a3b8;
+}
+
+.register-input input:focus,
+.register-input select:focus{
+
+    background:#111827 !important;
+
+    color:white !important;
+
+    border-color:#3b82f6 !important;
+
+    box-shadow:none !important;
+}
+
+.eye-icon{
+
+    position:absolute;
+
+    right:18px;
+
+    color:#94a3b8;
+
+    cursor:pointer;
+
+    z-index:5;
+}
+
+.eye-icon{
+    position:absolute;
+    right:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#94a3b8;
+    cursor:pointer;
+    z-index:10;
+}

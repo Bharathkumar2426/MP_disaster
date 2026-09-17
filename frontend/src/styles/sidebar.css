@@ -1,0 +1,85 @@
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #0d131f;
+  border-right: 1px solid #1e293b;
+  padding: 20px 14px;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-logo {
+  padding: 4px 8px 24px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 20px;
+}
+
+.sidebar-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: #2563eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sidebar-logo h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.2px;
+  color: #f8fafc;
+}
+
+.sidebar-logo p {
+  color: #64748b;
+  font-size: 11px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.sidebar .nav-link.active {
+  background: #1e293b;
+  color: #38bdf8;
+  font-weight: 600;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.sidebar-user {
+  padding: 12px;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+}
