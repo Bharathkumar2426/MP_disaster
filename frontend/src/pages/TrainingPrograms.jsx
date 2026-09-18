@@ -331,114 +331,138 @@ function TrainingPrograms() {
         {filteredPrograms.map((program) => (
           <div className="col-lg-6 mb-4" key={program.id}>
             <div
-              className="card shadow-lg border-0"
               style={{
                 borderRadius: "18px",
                 overflow: "hidden",
+                background: "#0f172a",
+                border: "1px solid #1e293b",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                transition: "border-color 0.2s, transform 0.2s",
               }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#334155"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e293b"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
-              <div className="row g-0">
-                <div className="col-2 bg-primary text-white text-center p-3">
-                  <h2>{new Date(program.startDate).getDate()}</h2>
-
-                  <h5>
-                    {new Date(program.startDate).toLocaleString("default", {
-                      month: "short",
-                    })}
-                  </h5>
-
-                  <small>{new Date(program.startDate).getFullYear()}</small>
+              <div style={{ display: "flex" }}>
+                {/* Date Column */}
+                <div style={{
+                  width: "80px",
+                  flexShrink: 0,
+                  background: "#2563eb",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "16px 8px",
+                  color: "#fff",
+                  textAlign: "center",
+                }}>
+                  <div style={{ fontSize: "28px", fontWeight: "800", lineHeight: 1 }}>
+                    {new Date(program.startDate).getDate()}
+                  </div>
+                  <div style={{ fontSize: "14px", fontWeight: "600", marginTop: "2px" }}>
+                    {new Date(program.startDate).toLocaleString("default", { month: "short" })}
+                  </div>
+                  <div style={{ fontSize: "12px", opacity: 0.85, marginTop: "2px" }}>
+                    {new Date(program.startDate).getFullYear()}
+                  </div>
                 </div>
 
-                <div className="col-10">
-                  <div className="p-4">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h4 className="fw-bold">{program.programName}</h4>
-
-                        <p className="text-muted mb-2">{program.description}</p>
-                      </div>
-
-                      <span
-                        className={
-                          program.status === "Active"
-                            ? "badge bg-success h-25"
-                            : program.status === "Upcoming"
-                              ? "badge bg-warning text-dark h-25"
-                              : "badge bg-secondary h-25"
-                        }
-                      >
-                        {program.status}
-                      </span>
+                {/* Content Column */}
+                <div style={{ flex: 1, padding: "16px 20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#f8fafc", margin: "0 0 4px 0" }}>
+                        {program.programName}
+                      </h4>
+                      <p style={{ fontSize: "13px", color: "#94a3b8", margin: "0 0 10px 0", lineHeight: 1.4 }}>
+                        {program.description}
+                      </p>
                     </div>
+                    <span style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      padding: "3px 10px",
+                      borderRadius: "100px",
+                      flexShrink: 0,
+                      background: program.status === "Active"
+                        ? "rgba(16,185,129,0.15)"
+                        : program.status === "Upcoming"
+                          ? "rgba(245,158,11,0.15)"
+                          : "rgba(100,116,139,0.15)",
+                      color: program.status === "Active"
+                        ? "#34d399"
+                        : program.status === "Upcoming"
+                          ? "#fbbf24"
+                          : "#94a3b8",
+                      border: `1px solid ${
+                        program.status === "Active"
+                          ? "rgba(16,185,129,0.3)"
+                          : program.status === "Upcoming"
+                            ? "rgba(245,158,11,0.3)"
+                            : "rgba(100,116,139,0.3)"
+                      }`,
+                    }}>
+                      {program.status?.toUpperCase()}
+                    </span>
+                  </div>
 
-                    <hr />
+                  <div style={{ height: "1px", background: "#1e293b", margin: "10px 0" }} />
 
-                    <div className="row">
-                      <div className="col-md-6">
-                        <div className="mb-3">
-                          <small className="text-muted">👨 TRAINER</small>
-                          <h6 className="fw-bold">{program.trainerName}</h6>
-                        </div>
-
-                        <div>
-                          <small className="text-muted">
-                            🏢 TRAINING CENTER
-                          </small>
-                          <h6>{program.trainingCenterName}</h6>
-                        </div>
-                      </div>
-
-                      <div className="col-md-6">
-                        <div className="mb-3">
-                          <small className="text-muted">👥 PARTICIPANTS</small>
-                          <h6>{program.maxParticipants}</h6>
-                        </div>
-
-                        <div>
-                          <small className="text-muted">⏱ DURATION</small>
-                          <h6>{program.durationDays} Days</h6>
-                        </div>
-                      </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", marginBottom: "12px" }}>
+                    <div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", letterSpacing: "0.05em", marginBottom: "2px" }}>👨 TRAINER</div>
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: "#e2e8f0" }}>{program.trainerName}</div>
                     </div>
+                    <div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", letterSpacing: "0.05em", marginBottom: "2px" }}>👥 PARTICIPANTS</div>
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: "#e2e8f0" }}>{program.maxParticipants}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", letterSpacing: "0.05em", marginBottom: "2px" }}>🏢 TRAINING CENTER</div>
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: "#e2e8f0" }}>{program.trainingCenterName}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748b", letterSpacing: "0.05em", marginBottom: "2px" }}>⏱ DURATION</div>
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: "#e2e8f0" }}>{program.durationDays} Days</div>
+                    </div>
+                  </div>
 
-                    <hr />
+                  <div style={{ height: "1px", background: "#1e293b", margin: "10px 0" }} />
 
-                    <div className="program-actions">
+                  <div className="program-actions">
+                    <button
+                      className="view-btn"
+                      onClick={() => handleView(program)}
+                    >
+                      👁 View
+                    </button>
+
+                    {canManagePrograms && (
                       <button
-                        className="view-btn"
-                        onClick={() => handleView(program)}
+                        className="edit-btn"
+                        onClick={() => handleEdit(program)}
                       >
-                        👁 View
+                        ✏ Edit
                       </button>
+                    )}
 
-                      {canManagePrograms && (
-                        <button
-                          className="edit-btn"
-                          onClick={() => handleEdit(program)}
-                        >
-                          ✏ Edit
-                        </button>
-                      )}
+                    {canManagePrograms && (
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(program.id)}
+                      >
+                        🗑 Delete
+                      </button>
+                    )}
 
-                      {canManagePrograms && (
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDelete(program.id)}
-                        >
-                          🗑 Delete
-                        </button>
-                      )}
-
-                      {!canManagePrograms && (
-                        <button
-                          className={`btn btn-sm ${enrolledIds.includes(program.id) ? "btn-success" : "btn-outline-primary"}`}
-                          onClick={() => handleEnroll(program.id)}
-                        >
-                          {enrolledIds.includes(program.id) ? "✅ Enrolled" : "📝 Enroll"}
-                        </button>
-                      )}
-                    </div>
+                    {!canManagePrograms && (
+                      <button
+                        className={`btn btn-sm ${enrolledIds.includes(program.id) ? "btn-success" : "btn-outline-primary"}`}
+                        onClick={() => handleEnroll(program.id)}
+                      >
+                        {enrolledIds.includes(program.id) ? "✅ Enrolled" : "📝 Enroll"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,4 +1,118 @@
-/* ---------- Users Page - Minimal Design ---------- */
+/* =====================================================
+   USERS.CSS - Minimalist Enterprise User Management
+   ===================================================== */
+
+.users-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.users-subtitle {
+  color: #94a3b8;
+  margin-top: 4px;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.users-add-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.users-add-btn:hover {
+  background: #1d4ed8;
+}
+
+.users-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.users-toolbar .search-box {
+  position: relative;
+  min-width: 240px;
+  flex: 1;
+}
+
+.users-toolbar .search-box input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  color: #f8fafc;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.users-toolbar .search-box input:focus {
+  border-color: #38bdf8;
+}
+
+.users-toolbar .search-box input::placeholder {
+  color: #64748b;
+}
+
+.users-toolbar .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+}
+
+.users-toolbar .filter-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.users-toolbar .filter-icon {
+  position: absolute;
+  left: 10px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.users-toolbar select {
+  padding: 8px 12px 8px 32px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.users-toolbar select:focus {
+  border-color: #38bdf8;
+}
+
+.users-count {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.users-count strong {
+  color: #38bdf8;
+}
 
 .users-card {
   background: #0f172a;
@@ -7,13 +121,43 @@
   overflow: hidden;
 }
 
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  background: #0b0f19;
+  border-bottom: 1px solid #1e293b;
+}
+
+.users-table td {
+  padding: 12px 18px;
+  vertical-align: middle;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(30, 41, 59, 0.5);
+}
+
 .role-badge {
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
 .role-admin {
@@ -32,4 +176,38 @@
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* User Action Buttons */
+.user-btn-edit {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 6px;
+  transition: all 0.15s ease;
+}
+
+.user-btn-edit:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+.user-btn-delete {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.user-btn-delete:hover {
+  background: #ef4444;
+  color: #fff;
 }

@@ -11,6 +11,7 @@ from routers import (
     training_programs,
     users,
     ai,
+    safety,
 )
 
 
@@ -51,6 +52,7 @@ app.include_router(training_centers.router)
 app.include_router(training_programs.router)
 app.include_router(users.router)
 app.include_router(ai.router)
+app.include_router(safety.router)
 
 
 @app.get("/", tags=["Health"])
@@ -68,6 +70,7 @@ def root():
             "/api/training-programs",
             "/api/users",
             "/api/ai",
+            "/api/safety",
         ],
     }
 

@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 
 function MainLayout({ children }) {
     return (
-        <div className="d-flex" style={{ height: "100vh", overflow: "hidden" }}>
+        <div className="d-flex" style={{ height: "100vh", overflow: "hidden", backgroundColor: "#090d16" }}>
 
             {/* Sidebar */}
             <Sidebar />
@@ -13,7 +13,8 @@ function MainLayout({ children }) {
                 className="d-flex flex-column flex-grow-1"
                 style={{
                     minWidth: 0,
-                    overflow: "hidden"
+                    overflow: "hidden",
+                    backgroundColor: "#090d16"
                 }}
             >
 
@@ -25,8 +26,8 @@ function MainLayout({ children }) {
                     className="flex-grow-1"
                     style={{
                         overflowY: "auto",
-                        background:"transparent",
-                        padding: "25px"
+                        backgroundColor: "#090d16",
+                        padding: "24px"
                     }}
                 >
                     {children}

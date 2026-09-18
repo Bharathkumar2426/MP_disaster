@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import "../styles/dashboard.css";
 import api from "../services/api";
 import DashboardCharts from "../components/DashboardCharts";
 import DashboardCard from "../components/DashboardCard";
 import DisasterMap from "../components/DisasterMap";
 import AlertBanner from "../components/AlertBanner";
-import { Users, AlertTriangle, Building2, GraduationCap, ChevronRight, Activity } from "lucide-react";
+import { Users, AlertTriangle, Building2, GraduationCap, ChevronRight, Activity, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function Dashboard() {
@@ -21,8 +21,7 @@ function Dashboard() {
   const [recentPrograms, setRecentPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadAllData() {
+  const loadAllData = useCallback(async () => {
       try {
         setLoading(true);
 
@@ -65,10 +64,17 @@ function Dashboard() {
       } finally {
         setLoading(false);
       }
-    }
+    }, []);
 
+  useEffect(() => {
     loadAllData();
-  }, []);
+    // Auto-refresh every 30 seconds for live map data
+    const interval = setInterval(() => {
+      api.get("/disasters").then(r => { if (Array.isArray(r?.data)) setAllDisasters(r.data); }).catch(() => {});
+      api.get("/training-centers").then(r => { if (Array.isArray(r?.data)) setAllCenters(r.data); }).catch(() => {});
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loadAllData]);
 
   return (
     <div className="container-fluid px-0">
@@ -85,6 +91,24 @@ function Dashboard() {
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <Link
+            to="/safety"
+            style={{
+              background: "rgba(56, 189, 248, 0.15)",
+              color: "#38bdf8",
+              border: "1px solid rgba(56, 189, 248, 0.3)",
+              padding: "7px 14px",
+              borderRadius: "6px",
+              fontSize: "13px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              textDecoration: "none",
+            }}
+          >
+            <ShieldCheck size={14} /> Safety Hub
+          </Link>
+          <Link
             to="/disasters"
             style={{
               background: "#2563eb",
@@ -96,6 +120,7 @@ function Dashboard() {
               display: "flex",
               alignItems: "center",
               gap: "6px",
+              textDecoration: "none",
             }}
           >
             Report Disaster <ChevronRight size={14} />

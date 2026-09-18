@@ -5,6 +5,7 @@ import Users from "./pages/Users";
 import Disasters from "./pages/Disasters";
 import TrainingCenters from "./pages/TrainingCenters";
 import TrainingPrograms from "./pages/TrainingPrograms";
+import SafetyPreparedness from "./pages/SafetyPreparedness";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
@@ -21,6 +22,17 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/safety"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <SafetyPreparedness />
               </MainLayout>
             </ProtectedRoute>
           }

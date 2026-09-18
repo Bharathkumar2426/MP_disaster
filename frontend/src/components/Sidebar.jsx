@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users as UsersIcon, Flame, Building2, GraduationCap, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Users as UsersIcon, Flame, Building2, GraduationCap, ShieldAlert, ShieldCheck } from "lucide-react";
 
 function Sidebar() {
   const location = useLocation();
@@ -19,6 +19,12 @@ function Sidebar() {
       icon: <LayoutDashboard size={18} />,
       name: "Dashboard",
       path: "/",
+      roles: ["ADMIN", "TRAINER", "PARTICIPANT"],
+    },
+    {
+      icon: <ShieldCheck size={18} />,
+      name: "Safety & Preparedness",
+      path: "/safety",
       roles: ["ADMIN", "TRAINER", "PARTICIPANT"],
     },
     {

@@ -22,16 +22,16 @@ function AlertBanner({ activeDisasters = [] }) {
   return (
     <div
       style={{
-        background: "rgba(220, 38, 38, 0.12)",
-        border: "1px solid rgba(220, 38, 38, 0.3)",
-        borderRadius: "10px",
+        background: "rgba(15, 23, 42, 0.9)",
+        border: "1px solid rgba(239, 68, 68, 0.35)",
+        borderLeft: "4px solid #ef4444",
+        borderRadius: "8px",
         padding: "10px 16px",
         marginBottom: "20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: "12px",
-        color: "#fecaca",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
@@ -40,58 +40,62 @@ function AlertBanner({ activeDisasters = [] }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "28px",
-            height: "28px",
-            borderRadius: "6px",
-            background: "#dc2626",
-            color: "#fff",
+            width: "24px",
+            height: "24px",
+            borderRadius: "5px",
+            background: "rgba(239, 68, 68, 0.15)",
+            color: "#f87171",
             flexShrink: 0,
           }}
         >
-          <AlertTriangle size={16} />
+          <AlertTriangle size={14} />
         </div>
-        <div style={{ fontSize: "0.85rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          <strong style={{ color: "#fff" }}>CRITICAL ALERT:</strong>{" "}
-          <span>
-            {latest.disasterName} in {latest.district || "Active Sector"} ({highSeverityDisasters.length} high-priority
-            incident{highSeverityDisasters.length > 1 ? "s" : ""})
+        <div style={{ fontSize: "13px", color: "#cbd5e1", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ color: "#f87171", fontWeight: "700", marginRight: "6px", fontSize: "11.5px", letterSpacing: "0.4px", textTransform: "uppercase" }}>
+            Alert:
+          </span>
+          <span style={{ color: "#f1f5f9", fontWeight: "600" }}>{latest.disasterName}</span> in {latest.district || "Active Sector"}{" "}
+          <span style={{ color: "#94a3b8" }}>
+            ({highSeverityDisasters.length} active high-priority)
           </span>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
         <button
           onClick={() => navigate("/disasters")}
           style={{
-            background: "#dc2626",
-            color: "#fff",
-            border: "none",
+            background: "rgba(239, 68, 68, 0.12)",
+            color: "#f87171",
+            border: "1px solid rgba(239, 68, 68, 0.3)",
             borderRadius: "6px",
             padding: "4px 10px",
-            fontSize: "0.78rem",
+            fontSize: "12px",
             fontWeight: "600",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             gap: "4px",
+            transition: "all 0.15s ease",
           }}
         >
-          View Incidents <ChevronRight size={14} />
+          View Incidents <ChevronRight size={13} />
         </button>
         <button
           onClick={() => setDismissed(true)}
           style={{
             background: "transparent",
             border: "none",
-            color: "#94a3b8",
+            color: "#64748b",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            padding: "2px",
+            padding: "4px",
+            borderRadius: "4px",
           }}
-          title="Dismiss banner"
+          title="Dismiss alert"
         >
-          <X size={16} />
+          <X size={15} />
         </button>
       </div>
     </div>

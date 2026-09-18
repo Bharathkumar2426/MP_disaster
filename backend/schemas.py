@@ -173,3 +173,83 @@ class DashboardStatsResponse(BaseModel):
     totalDisasters: int
     totalTrainingCenters: int
     totalTrainingPrograms: int
+
+
+# ==============================
+# Safety & Preparedness Schemas
+# ==============================
+
+class SafetyTypeItem(BaseModel):
+    id: str
+    name: str
+    category: str
+    severityRisk: str
+    description: str
+    icon: Optional[str] = "AlertTriangle"
+    badgeColor: Optional[str] = "#38bdf8"
+
+
+class SafetyStep(BaseModel):
+    title: str
+    description: str
+
+
+class ChecklistItem(BaseModel):
+    id: str
+    text: str
+
+
+class BeforeSection(BaseModel):
+    title: str
+    summary: str
+    steps: List[SafetyStep]
+    emergencyKit: List[str]
+    checklist: List[ChecklistItem]
+
+
+class DuringSection(BaseModel):
+    title: str
+    summary: str
+    steps: List[SafetyStep]
+    doNot: List[str]
+
+
+class AfterSection(BaseModel):
+    title: str
+    summary: str
+    steps: List[SafetyStep]
+    precautions: List[str]
+
+
+class PrecautionsSection(BaseModel):
+    dos: List[str]
+    donts: List[str]
+
+
+class EmergencyKitSection(BaseModel):
+    survivalBasics: List[str]
+    medicalHygiene: List[str]
+    powerComm: List[str]
+    documentsCash: List[str]
+
+
+class HelplineItem(BaseModel):
+    name: str
+    number: str
+    description: str
+
+
+class SafetyGuidanceResponse(BaseModel):
+    disasterType: str
+    category: str
+    severityRisk: str
+    description: str
+    icon: Optional[str] = "AlertTriangle"
+    badgeColor: Optional[str] = "#38bdf8"
+    overview: dict
+    before: BeforeSection
+    during: DuringSection
+    after: AfterSection
+    precautions: PrecautionsSection
+    emergencyKit: EmergencyKitSection
+    helplines: Optional[List[HelplineItem]] = None

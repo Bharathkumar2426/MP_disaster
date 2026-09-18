@@ -1,4 +1,6 @@
-/* ---------- Training Programs - Minimal Design ---------- */
+/* =====================================================
+   TRAININGPROGRAMS.CSS - Minimalist Enterprise Training Programs
+   ===================================================== */
 
 .training-stats-strip {
   display: flex;
@@ -56,7 +58,7 @@
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .training-toolbar input,
@@ -69,26 +71,33 @@
   padding: 0 12px;
   font-size: 13px;
   outline: none;
+  transition: border-color 0.15s ease;
 }
 
 .training-toolbar input:focus,
 .training-toolbar select:focus {
-  border-color: #2563eb;
+  border-color: #38bdf8;
+}
+
+.training-toolbar input::placeholder {
+  color: #64748b;
 }
 
 .program-card {
   background: #0f172a;
   border: 1px solid #1e293b;
   border-radius: 10px;
-  padding: 16px 18px;
-  transition: border-color 0.15s ease;
+  padding: 18px 20px;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 100%;
 }
 
 .program-card:hover {
   border-color: #334155;
+  transform: translateY(-2px);
 }
 
 .program-title {
@@ -99,8 +108,147 @@
 }
 
 .program-desc {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #94a3b8;
-  line-height: 1.4;
-  margin-bottom: 12px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.program-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+/* ── Program Action Buttons ── */
+.program-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.view-btn,
+.edit-btn,
+.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.view-btn {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+.view-btn:hover {
+  background: rgba(56, 189, 248, 0.22);
+}
+
+.edit-btn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.edit-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+/* ── Showing Count Label ── */
+.showing-count {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+/* ── Dark Theme Modals ── */
+.training-program-modal {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #f8fafc;
+}
+
+.training-program-header {
+  background: #111827;
+  border-bottom: 1px solid #1e293b;
+  color: #f8fafc;
+  padding: 16px 24px;
+}
+
+.training-program-header h4 {
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.training-program-body {
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 20px 24px;
+}
+
+.training-program-body p,
+.training-program-body label {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.training-program-body strong {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.training-program-body hr {
+  border-color: #1e293b;
+  margin: 14px 0;
+}
+
+.training-program-body .form-control,
+.training-program-body .form-select,
+.training-program-body textarea {
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.training-program-body .form-control:focus,
+.training-program-body .form-select:focus,
+.training-program-body textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: none;
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.training-program-body .form-control::placeholder,
+.training-program-body textarea::placeholder {
+  color: #475569;
+}
+
+.training-program-footer {
+  background: #111827;
+  border-top: 1px solid #1e293b;
+  padding: 12px 24px;
 }
