@@ -37,11 +37,15 @@ os.makedirs(os.path.dirname(DEFAULT_SQLITE_PATH), exist_ok=True)
 
 raw_db_url = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_PATH}")
 
-# Fix postgres:// legacy dialect prefix if present
+# Fix postgres:// and postgresql:// prefixes for SQLAlchemy psycopg2 compatibility
+# Render provides postgresql:// — SQLAlchemy needs postgresql+psycopg2://
 if raw_db_url.startswith("postgres://"):
-    DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = raw_db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif raw_db_url.startswith("postgresql://") and "+psycopg" not in raw_db_url:
+    DATABASE_URL = raw_db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 else:
     DATABASE_URL = raw_db_url
+
 
 # If SQLite URL has a relative path (e.g. sqlite:///./data/disaster_db.sqlite3),
 # resolve it relative to backend directory so it never breaks regardless of working directory

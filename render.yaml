@@ -1,0 +1,60 @@
+services:
+  # -- Backend --
+  - type: web
+    name: disaster-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: disaster-db
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://disaster-frontend.onrender.com
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENCAGE_API_KEY
+        sync: false
+      - key: NOAA_CDO_TOKEN
+        sync: false
+      - key: OPEN_METEO_BASE_URL
+        value: https://api.open-meteo.com/v1/forecast
+      - key: AI_CONFIDENCE_THRESHOLD
+        value: "0.60"
+      - key: AI_RISK_THRESHOLD
+        value: "0.70"
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "20"
+
+  # -- Frontend --
+  - type: web
+    name: disaster-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: VITE_API_BASE_URL
+        value: https://disaster-backend.onrender.com/api
+
+databases:
+  - name: disaster-db
+    databaseName: disaster_db
+    user: disaster_user
+    plan: free
