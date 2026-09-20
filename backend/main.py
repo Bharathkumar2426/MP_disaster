@@ -54,12 +54,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure CORS: allow specific origins and regex for all local dev ports with credentials
+# Configure CORS: allow localhost dev ports + any *.onrender.com production domain
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$",
+    allow_origin_regex=(
+        r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
+        r"|^https://[a-z0-9\-]+\.onrender\.com$"
+    ),
     allow_origins=[
         FRONTEND_URL,
         "http://localhost:5173",
