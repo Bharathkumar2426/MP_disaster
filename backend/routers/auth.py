@@ -10,8 +10,9 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(req: schemas.UserRegisterRequest, db: Session = Depends(get_db)):
+    clean_email = req.email.strip().lower()
     # Check if email exists
-    existing = db.query(models.User).filter(models.User.email == req.email).first()
+    existing = db.query(models.User).filter(models.User.email.ilike(clean_email)).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -24,10 +25,10 @@ def register_user(req: schemas.UserRegisterRequest, db: Session = Depends(get_db
         role = "PARTICIPANT"
 
     user = models.User(
-        fullName=req.fullName,
-        email=req.email,
+        fullName=req.fullName.strip(),
+        email=clean_email,
         password=hash_password(req.password),
-        phoneNumber=req.phoneNumber,
+        phoneNumber=req.phoneNumber.strip() if req.phoneNumber else None,
         role=role,
     )
     db.add(user)
@@ -39,7 +40,8 @@ def register_user(req: schemas.UserRegisterRequest, db: Session = Depends(get_db
 
 @router.post("/login", response_model=schemas.LoginResponse)
 def login_user(req: schemas.UserLoginRequest, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == req.email.strip()).first()
+    clean_email = req.email.strip().lower()
+    user = db.query(models.User).filter(models.User.email.ilike(clean_email)).first()
     if not user or not verify_password(req.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -61,3 +63,4 @@ def login_user(req: schemas.UserLoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.UserResponse)
 def get_me(current_user: models.User = Depends(get_current_user)):
     return current_user
+

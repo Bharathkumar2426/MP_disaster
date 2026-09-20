@@ -1,6 +1,41 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime, date
+
+
+# ==============================
+# Helpers for Empty-String Coercion
+# ==============================
+
+def _coerce_float(v):
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return None
+
+
+def _coerce_int(v, default=None):
+    if v is None or v == "":
+        return default
+    try:
+        return int(v)
+    except (ValueError, TypeError):
+        return default
+
+
+def _coerce_date(v):
+    if v is None or v == "":
+        return None
+    if isinstance(v, (date, datetime)):
+        return v
+    if isinstance(v, str):
+        try:
+            return date.fromisoformat(v[:10])
+        except (ValueError, TypeError):
+            return None
+    return None
 
 
 # ==============================
@@ -25,6 +60,14 @@ class UserRegisterRequest(BaseModel):
 class UserLoginRequest(BaseModel):
     email: str
     password: str
+
+
+class UserUpdate(BaseModel):
+    fullName: str
+    email: str
+    password: Optional[str] = None
+    phoneNumber: Optional[str] = None
+    role: Optional[str] = None
 
 
 class UserResponse(UserBase):
@@ -60,6 +103,11 @@ class DisasterBase(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+    @field_validator("latitude", "longitude", mode="before")
+    @classmethod
+    def validate_coords(cls, v):
+        return _coerce_float(v)
+
 
 class DisasterCreate(DisasterBase):
     pass
@@ -75,6 +123,11 @@ class DisasterUpdate(BaseModel):
     description: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+
+    @field_validator("latitude", "longitude", mode="before")
+    @classmethod
+    def validate_update_coords(cls, v):
+        return _coerce_float(v)
 
 
 class DisasterResponse(DisasterBase):
@@ -100,6 +153,16 @@ class TrainingCenterBase(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+    @field_validator("latitude", "longitude", mode="before")
+    @classmethod
+    def validate_center_coords(cls, v):
+        return _coerce_float(v)
+
+    @field_validator("capacity", mode="before")
+    @classmethod
+    def validate_capacity(cls, v):
+        return _coerce_int(v, default=50)
+
 
 class TrainingCenterCreate(TrainingCenterBase):
     pass
@@ -115,6 +178,16 @@ class TrainingCenterUpdate(BaseModel):
     status: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+
+    @field_validator("latitude", "longitude", mode="before")
+    @classmethod
+    def validate_center_update_coords(cls, v):
+        return _coerce_float(v)
+
+    @field_validator("capacity", mode="before")
+    @classmethod
+    def validate_center_update_capacity(cls, v):
+        return _coerce_int(v, default=None)
 
 
 class TrainingCenterResponse(TrainingCenterBase):
@@ -139,6 +212,26 @@ class TrainingProgramBase(BaseModel):
     description: Optional[str] = None
     trainingCenterId: Optional[int] = None
 
+    @field_validator("durationDays", mode="before")
+    @classmethod
+    def validate_duration(cls, v):
+        return _coerce_int(v, default=3)
+
+    @field_validator("maxParticipants", mode="before")
+    @classmethod
+    def validate_max_parts(cls, v):
+        return _coerce_int(v, default=30)
+
+    @field_validator("trainingCenterId", mode="before")
+    @classmethod
+    def validate_center_id(cls, v):
+        return _coerce_int(v, default=None)
+
+    @field_validator("startDate", "endDate", mode="before")
+    @classmethod
+    def validate_dates(cls, v):
+        return _coerce_date(v)
+
 
 class TrainingProgramCreate(TrainingProgramBase):
     pass
@@ -155,6 +248,16 @@ class TrainingProgramUpdate(BaseModel):
     description: Optional[str] = None
     trainingCenterId: Optional[int] = None
 
+    @field_validator("durationDays", "maxParticipants", "trainingCenterId", mode="before")
+    @classmethod
+    def validate_update_ints(cls, v):
+        return _coerce_int(v, default=None)
+
+    @field_validator("startDate", "endDate", mode="before")
+    @classmethod
+    def validate_update_dates(cls, v):
+        return _coerce_date(v)
+
 
 class TrainingProgramResponse(TrainingProgramBase):
     id: int
@@ -162,6 +265,7 @@ class TrainingProgramResponse(TrainingProgramBase):
 
     class Config:
         from_attributes = True
+
 
 
 # ==============================

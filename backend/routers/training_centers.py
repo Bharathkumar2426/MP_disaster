@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/api/training-centers", tags=["Training Centers"])
 def get_all_training_centers(
     search: Optional[str] = None,
     district: Optional[str] = None,
+    status_filter: Optional[str] = Query(None, alias="status"),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -26,6 +27,8 @@ def get_all_training_centers(
         )
     if district and district.upper() != "ALL":
         query = query.filter(models.TrainingCenter.district.ilike(f"%{district}%"))
+    if status_filter and status_filter.upper() != "ALL":
+        query = query.filter(models.TrainingCenter.status.ilike(status_filter))
 
     return query.order_by(models.TrainingCenter.id.desc()).all()
 
@@ -50,7 +53,12 @@ def create_training_center(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_roles(["ADMIN"])),
 ):
-    center = models.TrainingCenter(**center_in.dict())
+    data = (
+        center_in.model_dump()
+        if hasattr(center_in, "model_dump")
+        else center_in.dict()
+    )
+    center = models.TrainingCenter(**data)
     db.add(center)
     db.commit()
     db.refresh(center)
@@ -70,7 +78,12 @@ def update_training_center(
             status_code=status.HTTP_404_NOT_FOUND, detail="Training Center not found"
         )
 
-    for key, value in center_in.dict(exclude_unset=True).items():
+    data = (
+        center_in.model_dump(exclude_unset=True)
+        if hasattr(center_in, "model_dump")
+        else center_in.dict(exclude_unset=True)
+    )
+    for key, value in data.items():
         if value is not None:
             setattr(center, key, value)
 
@@ -92,4 +105,5 @@ def delete_training_center(
         )
     db.delete(center)
     db.commit()
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+

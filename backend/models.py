@@ -1,8 +1,14 @@
-from sqlalchemy import Column, Integer, String, Float, Text, Date, DateTime, ForeignKey, Enum as SQLEnum
+# pyrefly: ignore [missing-import]
+from sqlalchemy import Column, Integer, String, Float, Text, Date, DateTime, ForeignKey
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 import enum
 from database import Base
+
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 
 class RoleEnum(str, enum.Enum):
@@ -20,7 +26,7 @@ class User(Base):
     password = Column(String(255), nullable=False)
     phoneNumber = Column(String(20), nullable=True)
     role = Column(String(20), default=RoleEnum.PARTICIPANT.value, nullable=False)
-    createdAt = Column(DateTime, default=datetime.utcnow)
+    createdAt = Column(DateTime, default=utc_now)
 
 
 class Disaster(Base):
@@ -36,7 +42,8 @@ class Disaster(Base):
     description = Column(Text, nullable=True)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    reportedDate = Column(DateTime, default=datetime.utcnow)
+    reportedDate = Column(DateTime, default=utc_now)
+
 
 
 class TrainingCenter(Base):

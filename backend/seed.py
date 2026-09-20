@@ -61,7 +61,7 @@ def seed_database(db: Session):
             district="Wayanad",
             location="Meppadi Mountain Range",
             severity="MEDIUM",
-            status="PENDING",
+            status="ACTIVE",
             description="Slope instability triggered by continuous rain, blocking essential transport corridors.",
             latitude=11.6854,
             longitude=76.1320,
@@ -89,7 +89,7 @@ def seed_database(db: Session):
             capacity=120,
             contactNumber="+91-44-2345678",
             coordinatorName="Capt. Rajesh Menon",
-            status="ACTIVE",
+            status="Active",
             latitude=13.0067,
             longitude=80.2021,
         )
@@ -100,7 +100,7 @@ def seed_database(db: Session):
             capacity=60,
             contactNumber="+91-4936-202345",
             coordinatorName="Dr. Anita Thomas",
-            status="ACTIVE",
+            status="Active",
             latitude=11.6050,
             longitude=76.0828,
         )
@@ -111,7 +111,7 @@ def seed_database(db: Session):
             capacity=150,
             contactNumber="+91-484-2422555",
             coordinatorName="K. S. Narayanan",
-            status="ACTIVE",
+            status="Active",
             latitude=10.0159,
             longitude=76.3419,
         )
@@ -128,7 +128,7 @@ def seed_database(db: Session):
             startDate=date.today() + timedelta(days=2),
             endDate=date.today() + timedelta(days=7),
             maxParticipants=30,
-            status="ACTIVE",
+            status="Active",
             description="Intensive field drill on watercraft handling, victim retrieval, and life-vest deployment.",
             trainingCenterId=c1.id,
         )
@@ -139,7 +139,7 @@ def seed_database(db: Session):
             startDate=date.today() + timedelta(days=10),
             endDate=date.today() + timedelta(days=13),
             maxParticipants=25,
-            status="UPCOMING",
+            status="Upcoming",
             description="Pre-hospital emergency triage, hypothermia treatment, and litter carry techniques in rugged terrain.",
             trainingCenterId=c2.id,
         )
@@ -150,9 +150,10 @@ def seed_database(db: Session):
             startDate=date.today() - timedelta(days=14),
             endDate=date.today() - timedelta(days=10),
             maxParticipants=50,
-            status="COMPLETED",
+            status="Completed",
             description="Command structure, inter-agency communication, and logistical coordination during major disasters.",
             trainingCenterId=c3.id,
         )
         db.add_all([p1, p2, p3])
         db.commit()
+

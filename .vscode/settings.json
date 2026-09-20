@@ -1,4 +1,12 @@
 {
+  "python.defaultInterpreterPath": "C:/Users/dellh/AppData/Local/Programs/Python/Python312/python.exe",
   "python.terminal.useEnvFile": true,
-  "python.envFile": "${workspaceFolder}/backend/.env"
+  "python.envFile": "${workspaceFolder}/backend/.env",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/backend"
+  ]
 }
+

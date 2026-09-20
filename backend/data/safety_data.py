@@ -951,6 +951,8 @@ def get_safety_by_type(disaster_type: str):
             "tremor": "earthquake",
             "seismic": "earthquake",
             "heat wave": "heatwave",
+            "heat-wave": "heatwave",
+            "heat_wave": "heatwave",
             "drought": "heatwave"
         }
         if lookup in aliases and aliases[lookup] in SAFETY_KNOWLEDGE_BASE:

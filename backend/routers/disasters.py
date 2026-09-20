@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
@@ -29,9 +29,9 @@ def get_all_disasters(
             | (models.Disaster.location.ilike(s))
         )
     if severity and severity.upper() != "ALL":
-        query = query.filter(models.Disaster.severity == severity.upper())
+        query = query.filter(models.Disaster.severity.ilike(severity))
     if status_filter and status_filter.upper() != "ALL":
-        query = query.filter(models.Disaster.status == status_filter.upper())
+        query = query.filter(models.Disaster.status.ilike(status_filter))
     if district and district.upper() != "ALL":
         query = query.filter(models.Disaster.district.ilike(f"%{district}%"))
 
@@ -58,7 +58,12 @@ def create_disaster(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_roles(["ADMIN", "TRAINER"])),
 ):
-    disaster = models.Disaster(**disaster_in.dict())
+    data = (
+        disaster_in.model_dump()
+        if hasattr(disaster_in, "model_dump")
+        else disaster_in.dict()
+    )
+    disaster = models.Disaster(**data)
     db.add(disaster)
     db.commit()
     db.refresh(disaster)
@@ -78,7 +83,12 @@ def update_disaster(
             status_code=status.HTTP_404_NOT_FOUND, detail="Disaster not found"
         )
 
-    for key, value in disaster_in.dict(exclude_unset=True).items():
+    data = (
+        disaster_in.model_dump(exclude_unset=True)
+        if hasattr(disaster_in, "model_dump")
+        else disaster_in.dict(exclude_unset=True)
+    )
+    for key, value in data.items():
         if value is not None:
             setattr(disaster, key, value)
 
@@ -100,4 +110,5 @@ def delete_disaster(
         )
     db.delete(disaster)
     db.commit()
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+

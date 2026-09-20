@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
@@ -12,7 +12,8 @@ router = APIRouter(prefix="/api/training-programs", tags=["Training Programs"])
 @router.get("", response_model=List[schemas.TrainingProgramResponse])
 def get_all_training_programs(
     search: Optional[str] = None,
-    status_filter: Optional[str] = None,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    training_center_id: Optional[int] = Query(None, alias="trainingCenterId"),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -25,13 +26,19 @@ def get_all_training_programs(
             | (models.TrainingProgram.description.ilike(s))
         )
     if status_filter and status_filter.upper() != "ALL":
-        query = query.filter(models.TrainingProgram.status == status_filter.upper())
+        query = query.filter(models.TrainingProgram.status.ilike(status_filter))
+    if training_center_id:
+        query = query.filter(models.TrainingProgram.trainingCenterId == training_center_id)
 
     programs = query.order_by(models.TrainingProgram.id.desc()).all()
 
     results = []
     for p in programs:
-        center_name = p.trainingCenter.centerName if p.trainingCenter else "Regional Relief Hub"
+        center_name = (
+            p.trainingCenter.centerName
+            if p.trainingCenter
+            else "Regional Relief Hub"
+        )
         results.append(
             schemas.TrainingProgramResponse(
                 id=p.id,
@@ -83,12 +90,26 @@ def create_training_program(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_roles(["ADMIN", "TRAINER"])),
 ):
-    program = models.TrainingProgram(**prog_in.dict())
+    data = (
+        prog_in.model_dump()
+        if hasattr(prog_in, "model_dump")
+        else prog_in.dict()
+    )
+    program = models.TrainingProgram(**data)
     db.add(program)
     db.commit()
     db.refresh(program)
 
-    center_name = program.trainingCenter.centerName if program.trainingCenter else "Regional Relief Hub"
+    # Fetch center name accurately
+    center = (
+        db.query(models.TrainingCenter)
+        .filter(models.TrainingCenter.id == program.trainingCenterId)
+        .first()
+        if program.trainingCenterId
+        else None
+    )
+    center_name = center.centerName if center else "Regional Relief Hub"
+
     return schemas.TrainingProgramResponse(
         id=program.id,
         programName=program.programName,
@@ -117,14 +138,28 @@ def update_training_program(
             status_code=status.HTTP_404_NOT_FOUND, detail="Training Program not found"
         )
 
-    for key, value in prog_in.dict(exclude_unset=True).items():
+    data = (
+        prog_in.model_dump(exclude_unset=True)
+        if hasattr(prog_in, "model_dump")
+        else prog_in.dict(exclude_unset=True)
+    )
+    for key, value in data.items():
         if value is not None:
             setattr(program, key, value)
 
     db.commit()
     db.refresh(program)
 
-    center_name = program.trainingCenter.centerName if program.trainingCenter else "Regional Relief Hub"
+    # Fetch center name accurately
+    center = (
+        db.query(models.TrainingCenter)
+        .filter(models.TrainingCenter.id == program.trainingCenterId)
+        .first()
+        if program.trainingCenterId
+        else None
+    )
+    center_name = center.centerName if center else "Regional Relief Hub"
+
     return schemas.TrainingProgramResponse(
         id=program.id,
         programName=program.programName,
@@ -153,4 +188,5 @@ def delete_training_program(
         )
     db.delete(program)
     db.commit()
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+

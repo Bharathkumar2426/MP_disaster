@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import os
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 from jose import JWTError, jwt
 import bcrypt
@@ -8,35 +9,40 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 
-SECRET_KEY = "disaster_management_super_secret_jwt_key_2026_change_in_prod"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY", "disaster_management_super_secret_jwt_key_2026_change_in_prod"
+)
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60 * 24))
 
 security_scheme = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
-    pwd_bytes = password.encode("utf-8")
+    # Bcrypt only accepts passwords up to 72 bytes
+    pwd_bytes = password.encode("utf-8")[:72]
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        return bcrypt.checkpw(
-            plain_password.encode("utf-8"), hashed_password.encode("utf-8")
-        )
+        pwd_bytes = plain_password.encode("utf-8")[:72]
+        hash_bytes = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(pwd_bytes, hash_bytes)
     except Exception:
         return False
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
+    now_utc = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now_utc + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+        expire = now_utc + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # Store integer UNIX timestamp to prevent timezone misinterpretations
+    to_encode.update({"exp": int(expire.timestamp())})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -67,7 +73,8 @@ def get_current_user(
             detail="Could not validate credentials",
         )
 
-    user = db.query(models.User).filter(models.User.email == email).first()
+    # Use case-insensitive match for robust authentication
+    user = db.query(models.User).filter(models.User.email.ilike(email.strip())).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
@@ -86,3 +93,4 @@ def require_roles(allowed_roles: List[str]):
         return current_user
 
     return role_checker
+

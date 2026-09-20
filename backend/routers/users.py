@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
@@ -50,19 +50,24 @@ def create_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_roles(["ADMIN"])),
 ):
-    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
+    clean_email = user_in.email.strip().lower()
+    existing = db.query(models.User).filter(models.User.email.ilike(clean_email)).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exists",
         )
 
+    role = (user_in.role or "PARTICIPANT").upper()
+    if role not in ["ADMIN", "TRAINER", "PARTICIPANT"]:
+        role = "PARTICIPANT"
+
     user = models.User(
-        fullName=user_in.fullName,
-        email=user_in.email,
+        fullName=user_in.fullName.strip(),
+        email=clean_email,
         password=hash_password(user_in.password),
-        phoneNumber=user_in.phoneNumber,
-        role=(user_in.role or "PARTICIPANT").upper(),
+        phoneNumber=user_in.phoneNumber.strip() if user_in.phoneNumber else None,
+        role=role,
     )
     db.add(user)
     db.commit()
@@ -73,7 +78,7 @@ def create_user(
 @router.put("/{id}", response_model=schemas.UserResponse)
 def update_user(
     id: int,
-    user_in: schemas.UserBase,
+    user_in: schemas.UserUpdate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_roles(["ADMIN"])),
 ):
@@ -83,11 +88,30 @@ def update_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    user.fullName = user_in.fullName
-    user.email = user_in.email
-    user.phoneNumber = user_in.phoneNumber
+    clean_email = user_in.email.strip().lower()
+    # Check if another user already has this email
+    existing = (
+        db.query(models.User)
+        .filter(models.User.email.ilike(clean_email), models.User.id != id)
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Another user with this email already exists",
+        )
+
+    user.fullName = user_in.fullName.strip()
+    user.email = clean_email
+    user.phoneNumber = user_in.phoneNumber.strip() if user_in.phoneNumber else None
     if user_in.role:
-        user.role = user_in.role.upper()
+        role_up = user_in.role.upper()
+        if role_up in ["ADMIN", "TRAINER", "PARTICIPANT"]:
+            user.role = role_up
+
+    # Update password if explicitly provided and not empty
+    if user_in.password and user_in.password.strip():
+        user.password = hash_password(user_in.password.strip())
 
     db.commit()
     db.refresh(user)
@@ -112,4 +136,5 @@ def delete_user(
         )
     db.delete(user)
     db.commit()
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
