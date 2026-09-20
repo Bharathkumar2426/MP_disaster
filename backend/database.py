@@ -67,9 +67,14 @@ if DATABASE_URL.startswith("sqlite"):
         "timeout": 30,  # Prevent database locked errors under parallel requests
     }
 else:
+    # PostgreSQL (Neon, Supabase, Render, etc.)
+    # Neon requires SSL — sslmode=require
+    connect_args = {"sslmode": "require"}
     engine_kwargs = {
-        "pool_pre_ping": True,
-        "pool_recycle": 300,
+        "pool_pre_ping": True,       # Detect stale connections (important for serverless)
+        "pool_recycle": 300,         # Recycle connections every 5 min
+        "pool_size": 5,              # Keep 5 persistent connections
+        "max_overflow": 10,          # Allow 10 extra connections under load
     }
 
 engine = create_engine(DATABASE_URL, connect_args=connect_args, **engine_kwargs)

@@ -1,5 +1,5 @@
 services:
-  # -- Backend --
+  # -- Backend (FastAPI) --
   - type: web
     name: disaster-backend
     runtime: python
@@ -20,11 +20,9 @@ services:
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "1440"
       - key: DATABASE_URL
-        fromDatabase:
-          name: disaster-db
-          property: connectionString
+        sync: false        # Set manually: paste your Neon connection string here
       - key: FRONTEND_URL
-        value: https://disaster-frontend.onrender.com
+        sync: false        # Set manually: your Render frontend URL
       - key: GEMINI_API_KEY
         sync: false
       - key: OPENCAGE_API_KEY
@@ -40,7 +38,7 @@ services:
       - key: MAX_UPLOAD_SIZE_MB
         value: "20"
 
-  # -- Frontend --
+  # -- Frontend (React/Vite Static Site) --
   - type: web
     name: disaster-frontend
     runtime: node
@@ -51,10 +49,4 @@ services:
       - key: NODE_VERSION
         value: 20.0.0
       - key: VITE_API_BASE_URL
-        value: https://disaster-backend.onrender.com/api
-
-databases:
-  - name: disaster-db
-    databaseName: disaster_db
-    user: disaster_user
-    plan: free
+        sync: false        # Set manually: your Render backend URL + /api
