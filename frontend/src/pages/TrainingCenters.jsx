@@ -6,6 +6,7 @@ import {
   updateTrainingCenter,
   deleteTrainingCenter,
 } from "../services/trainingCenterService";
+import { resolveCoordinates } from "../utils/geoResolver";
 
 function TrainingCenters() {
   let user = null;
@@ -16,6 +17,8 @@ function TrainingCenters() {
   }
   const role = user?.role || "PARTICIPANT";
   const isAdmin = role === "ADMIN";
+  const isTrainer = role === "TRAINER";
+  const canManage = isAdmin || isTrainer;
 
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +27,14 @@ function TrainingCenters() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [capacityFilter, setCapacityFilter] = useState("ALL");
   const [sortOrder, setSortOrder] = useState("NEWEST");
-  const districts = [...new Set(centers.map((center) => center.district))];
-  const statuses = [...new Set(centers.map((center) => center.status))];
+  const districts = [...new Set(centers.map((center) => center.district).filter(Boolean))];
+  const statuses = [...new Set(centers.map((center) => center.status).filter(Boolean))];
   const [showModal, setShowModal] = useState(false);
   const [selectedCenter, setSelectedCenter] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [modalError, setModalError] = useState("");
   const [newCenter, setNewCenter] = useState({
     centerName: "",
     district: "",
@@ -62,34 +66,58 @@ function TrainingCenters() {
     setShowModal(true);
   };
 
+  const handleCenterFieldChange = (field, value) => {
+    const updated = { ...newCenter, [field]: value };
+    if (["district", "address", "centerName"].includes(field)) {
+      const resolved = resolveCoordinates(updated.district, updated.address, updated.centerName);
+      if (resolved) {
+        updated.latitude = resolved[0];
+        updated.longitude = resolved[1];
+      }
+    }
+    setNewCenter(updated);
+    if (modalError) setModalError("");
+  };
+
   const handleEdit = (center) => {
     setIsEditMode(true);
-
     setEditingId(center.id);
-
-    setNewCenter(center);
-
+    setModalError("");
+    setNewCenter({
+      centerName: center.centerName || "",
+      district: center.district || "",
+      address: center.address || "",
+      capacity: center.capacity || "",
+      contactNumber: center.contactNumber || "",
+      coordinatorName: center.coordinatorName || "",
+      status: center.status || "Active",
+      latitude: center.latitude || "",
+      longitude: center.longitude || "",
+    });
     setShowAddModal(true);
   };
 
   const handleAdd = async () => {
     try {
+      setModalError("");
+      const payload = { ...newCenter };
+      if (!payload.latitude || !payload.longitude) {
+        const resolved = resolveCoordinates(payload.district, payload.address, payload.centerName);
+        if (resolved) {
+          payload.latitude = resolved[0];
+          payload.longitude = resolved[1];
+        }
+      }
+
       if (isEditMode) {
-        await updateTrainingCenter(editingId, newCenter);
-
-        alert("Training Center Updated Successfully");
+        await updateTrainingCenter(editingId, payload);
       } else {
-        await createTrainingCenter(newCenter);
-
-        alert("Training Center Added Successfully");
+        await createTrainingCenter(payload);
       }
 
       setShowAddModal(false);
-
       setIsEditMode(false);
-
       setEditingId(null);
-
       setNewCenter({
         centerName: "",
         district: "",
@@ -101,12 +129,12 @@ function TrainingCenters() {
         latitude: "",
         longitude: "",
       });
-
       loadCenters();
     } catch (error) {
       console.error(error);
-
-      alert("Operation Failed");
+      setModalError(
+        error?.response?.data?.detail || "Operation failed. Please check input fields."
+      );
     }
   };
 
@@ -114,21 +142,16 @@ function TrainingCenters() {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this Training Center?",
     );
-
     if (!confirmDelete) return;
 
     try {
       await deleteTrainingCenter(id);
-
-      alert("Training Center deleted successfully.");
-
       loadCenters();
     } catch (error) {
-      console.error(error);
-
-      alert("Failed to delete Training Center.");
+      console.error("Failed to delete Training Center:", error);
     }
   };
+
 
   if (loading) {
     return (
@@ -190,14 +213,13 @@ function TrainingCenters() {
           <p className="text-muted">Manage Disaster Training Infrastructure</p>
         </div>
 
-        {isAdmin && (
+        {canManage && (
           <button
             className="btn btn-success"
             onClick={() => {
               setIsEditMode(false);
-
               setEditingId(null);
-
+              setModalError("");
               setNewCenter({
                 centerName: "",
                 district: "",
@@ -209,13 +231,13 @@ function TrainingCenters() {
                 latitude: "",
                 longitude: "",
               });
-
               setShowAddModal(true);
             }}
           >
             + Add Training Center
           </button>
         )}
+
       </div>
 
       <div className="training-stats-strip">
@@ -378,13 +400,13 @@ function TrainingCenters() {
                   👁 View
                 </button>
 
-                {isAdmin && (
+                {canManage && (
                   <button className="edit-btn" onClick={() => handleEdit(center)}>
                     ✏ Edit
                   </button>
                 )}
 
-                {isAdmin && (
+                {canManage && (
                   <button
                     className="delete-btn"
                     onClick={() => handleDelete(center.id)}
@@ -392,6 +414,7 @@ function TrainingCenters() {
                     🗑 Delete
                   </button>
                 )}
+
               </div>
             </div>
           </div>
@@ -499,34 +522,40 @@ function TrainingCenters() {
               </div>
 
               <div className="modal-body training-modal-body">
+                {modalError && (
+                  <div
+                    style={{
+                      background: "rgba(239, 68, 68, 0.15)",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      color: "#fca5a5",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      marginBottom: "16px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    ⚠ {modalError}
+                  </div>
+                )}
+
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label>Center Name</label>
-
                     <input
                       className="form-control"
+                      placeholder="e.g. Northern Relief Academy"
                       value={newCenter.centerName}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          centerName: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("centerName", e.target.value)}
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label>District</label>
-
+                    <label>District / Region</label>
                     <input
                       className="form-control"
+                      placeholder="e.g. Kangra, Kullu, Shimla"
                       value={newCenter.district}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          district: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("district", e.target.value)}
                     />
                   </div>
                 </div>
@@ -534,32 +563,21 @@ function TrainingCenters() {
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label>Address</label>
-
                     <input
                       className="form-control"
+                      placeholder="e.g. Dharamshala, Himachal Pradesh"
                       value={newCenter.address}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          address: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("address", e.target.value)}
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
                     <label>Capacity</label>
-
                     <input
                       type="number"
                       className="form-control"
                       value={newCenter.capacity}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          capacity: Number(e.target.value),
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("capacity", Number(e.target.value))}
                     />
                   </div>
                 </div>
@@ -567,31 +585,19 @@ function TrainingCenters() {
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label>Contact Number</label>
-
                     <input
                       className="form-control"
                       value={newCenter.contactNumber}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          contactNumber: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("contactNumber", e.target.value)}
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
                     <label>Coordinator Name</label>
-
                     <input
                       className="form-control"
                       value={newCenter.coordinatorName}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          coordinatorName: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("coordinatorName", e.target.value)}
                     />
                   </div>
                 </div>
@@ -599,16 +605,10 @@ function TrainingCenters() {
                 <div className="row">
                   <div className="col-md-4 mb-3">
                     <label>Status</label>
-
                     <select
                       className="form-select"
                       value={newCenter.status}
-                      onChange={(e) =>
-                        setNewCenter({
-                          ...newCenter,
-                          status: e.target.value,
-                        })
-                      }
+                      onChange={(e) => handleCenterFieldChange("status", e.target.value)}
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
@@ -616,39 +616,40 @@ function TrainingCenters() {
                   </div>
 
                   <div className="col-md-4 mb-3">
-                    <label>Latitude</label>
-
+                    <label>Latitude (GIS)</label>
                     <input
                       type="number"
                       step="any"
                       className="form-control"
+                      placeholder="e.g. 31.1048"
                       value={newCenter.latitude}
                       onChange={(e) =>
                         setNewCenter({
                           ...newCenter,
-                          latitude: Number(e.target.value),
+                          latitude: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                     />
                   </div>
 
                   <div className="col-md-4 mb-3">
-                    <label>Longitude</label>
-
+                    <label>Longitude (GIS)</label>
                     <input
                       type="number"
                       step="any"
                       className="form-control"
+                      placeholder="e.g. 77.1734"
                       value={newCenter.longitude}
                       onChange={(e) =>
                         setNewCenter({
                           ...newCenter,
-                          longitude: Number(e.target.value),
+                          longitude: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                     />
                   </div>
                 </div>
+
               </div>
 
               <div className="modal-footer training-modal-footer">

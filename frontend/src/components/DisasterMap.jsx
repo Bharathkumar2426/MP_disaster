@@ -4,54 +4,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { AlertTriangle, Building2, Layers, Filter, RefreshCw, Clock, MapPin, Activity, Zap } from "lucide-react";
 
-// ─── District Coordinate Registry ───────────────────────────────────────────
-const DISTRICT_COORDINATES = {
-  chennai: [13.0827, 80.2707],
-  coimbatore: [11.0168, 76.9558],
-  madurai: [9.9252, 78.1198],
-  salem: [11.6643, 78.146],
-  trichy: [10.7905, 78.7047],
-  tiruchirappalli: [10.7905, 78.7047],
-  tirunelveli: [8.7139, 77.7567],
-  vellore: [12.9165, 79.1325],
-  thanjavur: [10.787, 79.1378],
-  cuddalore: [11.748, 79.7714],
-  kanyakumari: [8.0883, 77.5385],
-  nagapattinam: [10.7672, 79.8449],
-  erode: [11.341, 77.7172],
-  kancheepuram: [12.8342, 79.7036],
-  karur: [10.9601, 78.0766],
-  wayanad: [11.6854, 76.132],
-  kozhikode: [11.2588, 75.7804],
-  thiruvananthapuram: [8.5241, 76.9366],
-  thrissur: [10.5276, 76.2144],
-  alappuzha: [9.4981, 76.3388],
-  mumbai: [19.076, 72.8777],
-  delhi: [28.6139, 77.209],
-  bengaluru: [12.9716, 77.5946],
-  bangalore: [12.9716, 77.5946],
-  hyderabad: [17.385, 78.4867],
-  kolkata: [22.5726, 88.3639],
-  pune: [18.5204, 73.8567],
-  ahmedabad: [23.0225, 72.5714],
-  surat: [21.1702, 72.8311],
-  visakhapatnam: [17.6868, 83.2185],
-  default: [11.1271, 78.6569],
-};
+import { getDisasterCoordinates } from "../utils/geoResolver";
 
-function getCoords(disaster) {
-  // Use actual lat/lng from DB when available
-  if (disaster.latitude && disaster.longitude) {
-    return [parseFloat(disaster.latitude), parseFloat(disaster.longitude)];
-  }
-  // Fallback: district-based with deterministic offset to avoid overlap
-  const key = (disaster.district || "").toLowerCase().trim();
-  const base = DISTRICT_COORDINATES[key] || DISTRICT_COORDINATES.default;
-  const id = disaster.id || 1;
-  const offsetLat = ((id * 37) % 100) * 0.004 - 0.2;
-  const offsetLng = ((id * 73) % 100) * 0.004 - 0.2;
-  return [base[0] + offsetLat, base[1] + offsetLng];
-}
+const getCoords = getDisasterCoordinates;
+
 
 // ─── Severity Config ─────────────────────────────────────────────────────────
 const SEV = {
@@ -371,7 +327,7 @@ function DisasterMap({ disasters = [], centers = [] }) {
     [filtered]
   );
 
-  const defaultCenter = [11.1271, 78.6569];
+  const defaultCenter = [22.5937, 78.9629];
 
   return (
     <div style={{ background: "#0a0f1e", border: "1px solid #1e293b", borderRadius: "14px", overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>

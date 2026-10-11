@@ -23,6 +23,7 @@ import {
   deleteDisaster,
 } from "../services/disasterService";
 import { exportDisastersPDF, exportToCSV } from "../utils/reportGenerator";
+import { resolveCoordinates } from "../utils/geoResolver";
 
 function Disasters() {
   let user = null;
@@ -50,6 +51,7 @@ function Disasters() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedDisasterId, setSelectedDisasterId] = useState(null);
+  const [modalError, setModalError] = useState("");
 
   const [newDisaster, setNewDisaster] = useState({
     disasterName: "",
@@ -62,6 +64,7 @@ function Disasters() {
     latitude: "",
     longitude: "",
   });
+
 
   const loadDisasters = async () => {
     setLoading(true);
@@ -119,14 +122,33 @@ function Disasters() {
       await deleteDisaster(id);
       loadDisasters();
     } catch (error) {
-      console.error(error);
-      alert("Delete operation failed.");
+      console.error("Delete operation failed:", error);
     }
+  }
+
+  function handleFieldChange(field, value) {
+    const updated = { ...newDisaster, [field]: value };
+    // Auto-resolve coordinates if district/location/name/description changed and user hasn't manually overridden coords
+    if (["district", "location", "disasterName", "description"].includes(field)) {
+      const resolved = resolveCoordinates(
+        updated.district,
+        updated.location,
+        updated.disasterName,
+        updated.description
+      );
+      if (resolved) {
+        updated.latitude = resolved[0];
+        updated.longitude = resolved[1];
+      }
+    }
+    setNewDisaster(updated);
+    if (modalError) setModalError("");
   }
 
   function handleEdit(disaster) {
     setIsEditMode(true);
     setSelectedDisasterId(disaster.id);
+    setModalError("");
     setNewDisaster({
       disasterName: disaster.disasterName || "",
       disasterType: disaster.disasterType || "",
@@ -143,10 +165,27 @@ function Disasters() {
 
   async function handleSave() {
     try {
+      setModalError("");
+      const payload = { ...newDisaster };
+
+      // Ensure coordinates are resolved if missing
+      if (!payload.latitude || !payload.longitude) {
+        const resolved = resolveCoordinates(
+          payload.district,
+          payload.location,
+          payload.disasterName,
+          payload.description
+        );
+        if (resolved) {
+          payload.latitude = resolved[0];
+          payload.longitude = resolved[1];
+        }
+      }
+
       if (isEditMode) {
-        await updateDisaster(selectedDisasterId, newDisaster);
+        await updateDisaster(selectedDisasterId, payload);
       } else {
-        await createDisaster(newDisaster);
+        await createDisaster(payload);
       }
 
       setShowModal(false);
@@ -166,9 +205,12 @@ function Disasters() {
       loadDisasters();
     } catch (error) {
       console.error(error);
-      alert("Operation failed. Please verify input fields.");
+      setModalError(
+        error?.response?.data?.detail || "Operation failed. Please verify the input fields."
+      );
     }
   }
+
 
   const total = disasters.length;
   const active = disasters.filter((d) => d.status === "ACTIVE").length;
@@ -534,14 +576,30 @@ function Disasters() {
             </div>
 
             <div className="disaster-modal-body">
+              {modalError && (
+                <div
+                  style={{
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    color: "#fca5a5",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    marginBottom: "14px",
+                    fontSize: "13px",
+                  }}
+                >
+                  ⚠ {modalError}
+                </div>
+              )}
+
               <div className="row g-3">
                 <div className="col-md-6">
                   <label>Disaster Name</label>
                   <input
                     className="form-control"
-                    placeholder="e.g. Coastal Flash Flood"
+                    placeholder="e.g. Flash Flood / Landslide"
                     value={newDisaster.disasterName}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, disasterName: e.target.value })}
+                    onChange={(e) => handleFieldChange("disasterName", e.target.value)}
                   />
                 </div>
 
@@ -549,19 +607,19 @@ function Disasters() {
                   <label>Disaster Type</label>
                   <input
                     className="form-control"
-                    placeholder="e.g. Flood, Cyclone, Fire"
+                    placeholder="e.g. Flood, Cyclone, Landslide, Fire"
                     value={newDisaster.disasterType}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, disasterType: e.target.value })}
+                    onChange={(e) => handleFieldChange("disasterType", e.target.value)}
                   />
                 </div>
 
                 <div className="col-md-6">
-                  <label>District</label>
+                  <label>District / Region</label>
                   <input
                     className="form-control"
-                    placeholder="e.g. Cuddalore"
+                    placeholder="e.g. Kangra, Kullu, Shimla, Mandi"
                     value={newDisaster.district}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, district: e.target.value })}
+                    onChange={(e) => handleFieldChange("district", e.target.value)}
                   />
                 </div>
 
@@ -569,9 +627,9 @@ function Disasters() {
                   <label>Location / Area</label>
                   <input
                     className="form-control"
-                    placeholder="e.g. Sector 4, River Basin"
+                    placeholder="e.g. Dharamshala, Manali, Himachal Pradesh"
                     value={newDisaster.location}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, location: e.target.value })}
+                    onChange={(e) => handleFieldChange("location", e.target.value)}
                   />
                 </div>
 
@@ -580,7 +638,7 @@ function Disasters() {
                   <select
                     className="form-select"
                     value={newDisaster.severity}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, severity: e.target.value })}
+                    onChange={(e) => handleFieldChange("severity", e.target.value)}
                   >
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>
@@ -593,13 +651,47 @@ function Disasters() {
                   <select
                     className="form-select"
                     value={newDisaster.status}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, status: e.target.value })}
+                    onChange={(e) => handleFieldChange("status", e.target.value)}
                   >
                     <option value="ACTIVE">ACTIVE</option>
                     <option value="UNDER_CONTROL">UNDER_CONTROL</option>
                     <option value="RESOLVED">RESOLVED</option>
                   </select>
                 </div>
+
+                {/* GIS Coordinates */}
+                <div className="col-md-6">
+                  <label>Latitude (GIS)</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    className="form-control"
+                    placeholder="e.g. 31.1048"
+                    value={newDisaster.latitude}
+                    onChange={(e) => setNewDisaster({ ...newDisaster, latitude: e.target.value })}
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label>Longitude (GIS)</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    className="form-control"
+                    placeholder="e.g. 77.1734"
+                    value={newDisaster.longitude}
+                    onChange={(e) => setNewDisaster({ ...newDisaster, longitude: e.target.value })}
+                  />
+                </div>
+
+                {newDisaster.latitude && newDisaster.longitude && (
+                  <div className="col-12" style={{ marginTop: "-2px" }}>
+                    <div style={{ fontSize: "12px", color: "#38bdf8", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <MapPin size={13} />
+                      Target Map Coordinates: [{Number(newDisaster.latitude).toFixed(4)}, {Number(newDisaster.longitude).toFixed(4)}]
+                    </div>
+                  </div>
+                )}
 
                 <div className="col-12">
                   <label>Incident Details & Observations</label>
@@ -608,7 +700,7 @@ function Disasters() {
                     className="form-control"
                     placeholder="Provide details regarding damages, required personnel, or relief equipment needed..."
                     value={newDisaster.description}
-                    onChange={(e) => setNewDisaster({ ...newDisaster, description: e.target.value })}
+                    onChange={(e) => handleFieldChange("description", e.target.value)}
                   />
                 </div>
               </div>

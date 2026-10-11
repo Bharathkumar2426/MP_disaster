@@ -63,6 +63,19 @@ def create_disaster(
         if hasattr(disaster_in, "model_dump")
         else disaster_in.dict()
     )
+    # Auto-resolve coordinates if not manually specified
+    if not data.get("latitude") or not data.get("longitude"):
+        from geo_resolver import resolve_coordinates
+        coords = resolve_coordinates(
+            district=data.get("district"),
+            location=data.get("location"),
+            name=data.get("disasterName"),
+            description=data.get("description"),
+        )
+        if coords:
+            data["latitude"] = coords[0]
+            data["longitude"] = coords[1]
+
     disaster = models.Disaster(**data)
     db.add(disaster)
     db.commit()
@@ -91,6 +104,19 @@ def update_disaster(
     for key, value in data.items():
         if value is not None:
             setattr(disaster, key, value)
+
+    # Re-resolve if coordinates remain missing
+    if not disaster.latitude or not disaster.longitude:
+        from geo_resolver import resolve_coordinates
+        coords = resolve_coordinates(
+            district=disaster.district,
+            location=disaster.location,
+            name=disaster.disasterName,
+            description=disaster.description,
+        )
+        if coords:
+            disaster.latitude = coords[0]
+            disaster.longitude = coords[1]
 
     db.commit()
     db.refresh(disaster)

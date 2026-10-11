@@ -6,6 +6,7 @@ import {
   updateTrainingProgram,
   deleteTrainingProgram,
 } from "../services/trainingProgramService";
+import { getTrainingCenters } from "../services/trainingCenterService";
 
 function TrainingPrograms() {
   let user = null;
@@ -20,7 +21,14 @@ function TrainingPrograms() {
   const canManagePrograms = isAdmin || isTrainer;
 
   const [programs, setPrograms] = useState([]);
-  const [enrolledIds, setEnrolledIds] = useState([]);
+  const [centers, setCenters] = useState([]);
+  const [enrolledIds, setEnrolledIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("enrolled_programs") || "[]");
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
@@ -28,12 +36,11 @@ function TrainingPrograms() {
   const [sortBy, setSortBy] = useState("Newest");
 
   const [showViewModal, setShowViewModal] = useState(false);
-
   const [showAddModal, setShowAddModal] = useState(false);
+  const [modalError, setModalError] = useState("");
 
   const [editing, setEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
   const [selectedProgram, setSelectedProgram] = useState(null);
 
   const [programForm, setProgramForm] = useState({
@@ -50,9 +57,17 @@ function TrainingPrograms() {
 
   const loadPrograms = async () => {
     try {
-      const response = await getTrainingPrograms();
+      const [progRes, centersRes] = await Promise.allSettled([
+        getTrainingPrograms(),
+        getTrainingCenters(),
+      ]);
 
-      setPrograms(response.data);
+      if (progRes.status === "fulfilled" && progRes.value?.data) {
+        setPrograms(progRes.value.data);
+      }
+      if (centersRes.status === "fulfilled" && centersRes.value?.data) {
+        setCenters(centersRes.value.data);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -65,13 +80,17 @@ function TrainingPrograms() {
   }, []);
 
   const handleEnroll = (programId) => {
-    if (enrolledIds.includes(programId)) {
-      setEnrolledIds(enrolledIds.filter((id) => id !== programId));
-      alert("Registration cancelled for this program.");
-    } else {
-      setEnrolledIds([...enrolledIds, programId]);
-      alert("🎉 Successfully registered for training program!");
-    }
+    setEnrolledIds((prev) => {
+      const next = prev.includes(programId)
+        ? prev.filter((id) => id !== programId)
+        : [...prev, programId];
+      try {
+        localStorage.setItem("enrolled_programs", JSON.stringify(next));
+      } catch (e) {
+        console.error("Failed to save enrollment:", e);
+      }
+      return next;
+    });
   };
 
   const handleView = (program) => {
@@ -82,6 +101,7 @@ function TrainingPrograms() {
   const handleAddClick = () => {
     setEditing(false);
     setEditingId(null);
+    setModalError("");
     setProgramForm({
       programName: "",
       trainerName: "",
@@ -93,24 +113,25 @@ function TrainingPrograms() {
       description: "",
       trainingCenterId: "",
     });
-
     setShowAddModal(true);
   };
+
   const handleEdit = (program) => {
     setEditing(true);
     setEditingId(program.id);
     setSelectedProgram(program);
+    setModalError("");
 
     setProgramForm({
-      programName: program.programName,
-      trainerName: program.trainerName,
-      durationDays: program.durationDays,
-      startDate: program.startDate,
-      endDate: program.endDate,
-      maxParticipants: program.maxParticipants,
-      status: program.status,
-      description: program.description,
-      trainingCenterId: program.trainingCenterId,
+      programName: program.programName || "",
+      trainerName: program.trainerName || "",
+      durationDays: program.durationDays || "",
+      startDate: program.startDate || "",
+      endDate: program.endDate || "",
+      maxParticipants: program.maxParticipants || "",
+      status: program.status || "Upcoming",
+      description: program.description || "",
+      trainingCenterId: program.trainingCenterId || "",
     });
 
     setShowAddModal(true);
@@ -118,22 +139,21 @@ function TrainingPrograms() {
 
   const handleSave = async () => {
     try {
+      setModalError("");
+      const payload = {
+        ...programForm,
+        trainingCenterId: programForm.trainingCenterId ? Number(programForm.trainingCenterId) : null,
+      };
+
       if (editing) {
-        await updateTrainingProgram(editingId, programForm);
-
-        alert("Program Updated Successfully");
+        await updateTrainingProgram(editingId, payload);
       } else {
-        await createTrainingProgram(programForm);
-
-        alert("Program Added Successfully");
+        await createTrainingProgram(payload);
       }
 
       setShowAddModal(false);
-
       setEditing(false);
-
       setEditingId(null);
-
       setProgramForm({
         programName: "",
         trainerName: "",
@@ -149,26 +169,23 @@ function TrainingPrograms() {
       loadPrograms();
     } catch (error) {
       console.error(error);
-
-      alert("Operation Failed");
+      setModalError(
+        error?.response?.data?.detail || "Operation failed. Please verify input fields."
+      );
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this program?")) return;
+    if (!window.confirm("Are you sure you want to delete this program?")) return;
 
     try {
       await deleteTrainingProgram(id);
-
-      alert("Program Deleted Successfully");
-
       loadPrograms();
     } catch (error) {
-      console.error(error);
-
-      alert("Delete Failed");
+      console.error("Delete Failed:", error);
     }
   };
+
 
   if (loading) {
     return (
@@ -574,10 +591,25 @@ function TrainingPrograms() {
               </div>
 
               <div className="modal-body training-program-body">
+                {modalError && (
+                  <div
+                    style={{
+                      background: "rgba(239, 68, 68, 0.15)",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      color: "#fca5a5",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      marginBottom: "16px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    ⚠ {modalError}
+                  </div>
+                )}
+
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label>Program Name</label>
-
                     <input
                       className="form-control"
                       value={programForm.programName}
@@ -592,7 +624,6 @@ function TrainingPrograms() {
 
                   <div className="col-md-6 mb-3">
                     <label>Trainer Name</label>
-
                     <input
                       className="form-control"
                       value={programForm.trainerName}
@@ -605,10 +636,10 @@ function TrainingPrograms() {
                     />
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-md-8 mb-3">
-                    <label>Description</label>
 
+                <div className="row">
+                  <div className="col-md-7 mb-3">
+                    <label>Description</label>
                     <textarea
                       className="form-control"
                       rows="3"
@@ -622,25 +653,32 @@ function TrainingPrograms() {
                     ></textarea>
                   </div>
 
-                  <div className="col-md-4 mb-3">
-                    <label>Training Center ID</label>
-
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={programForm.trainingCenterId}
+                  <div className="col-md-5 mb-3">
+                    <label>Assigned Training Center</label>
+                    <select
+                      className="form-select"
+                      value={programForm.trainingCenterId || ""}
                       onChange={(e) =>
                         setProgramForm({
                           ...programForm,
                           trainingCenterId: e.target.value,
                         })
                       }
-                    />
+                    >
+                      <option value="">-- Select Center (Optional) --</option>
+                      {centers.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.centerName} ({c.district})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
+
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label>Duration (Days)</label>
+
 
                     <input
                       type="number"

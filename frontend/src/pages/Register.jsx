@@ -20,6 +20,7 @@ function Register() {
     role: "PARTICIPANT",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -28,20 +29,21 @@ function Register() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    if (error) setError("");
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       await registerUser(formData);
-
-      alert("Registration Successful");
       navigate("/login");
-    } catch (error) {
-      alert("Registration Failed");
-
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err?.response?.data?.detail || "Registration failed. Please check your details and try again."
+      );
     }
   };
 
@@ -49,21 +51,34 @@ function Register() {
     <div className="register-page">
       <div className="register-card">
         <div className="register-header">
-
           <div className="register-logo">
             ⚡ Disaster Management
           </div>
-
           <h2>Create Your Account</h2>
-
           <p>
             Join the Disaster Response Platform
           </p>
-
         </div>
 
         <div className="card-body p-4">
+          {error && (
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "1px solid rgba(239, 68, 68, 0.4)",
+                color: "#fca5a5",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                marginBottom: "16px",
+                fontSize: "13px",
+              }}
+            >
+              ⚠ {error}
+            </div>
+          )}
+
           <form onSubmit={handleRegister}>
+
             <div className="row">
               <div className="col-md-6 mb-3">
 

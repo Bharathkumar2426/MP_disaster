@@ -14,43 +14,62 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     setLoginData({
       ...loginData,
       [e.target.name]: e.target.value,
     });
+    if (error) setError("");
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       const response = await loginUser(loginData);
-
       localStorage.setItem("user", JSON.stringify(response.data));
-
-      alert(response.data.message);
       setLoading(false);
       navigate("/");
-    } catch {
+    } catch (err) {
       setLoading(false);
-
-      alert("Invalid Email or Password");
+      setError(
+        err?.response?.data?.detail || "Invalid Email or Password. Please try again."
+      );
     }
   };
+
   return (
     <div className="login-page">
       <div className="login-card">
         <div className="login-header">
           <h1>⚡ Disaster Management System</h1>
-
           <p>Secure Disaster Response Platform</p>
-
           <h4>Welcome Back 👋</h4>
         </div>
 
         <div className="login-body">
+          {error && (
+            <div
+              style={{
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "1px solid rgba(239, 68, 68, 0.4)",
+                color: "#fca5a5",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                marginBottom: "16px",
+                fontSize: "13px",
+              }}
+            >
+              ⚠ {error}
+            </div>
+          )}
+
           <form onSubmit={handleLogin}>
+
             <div className="mb-3">
               <label>Email</label>
 

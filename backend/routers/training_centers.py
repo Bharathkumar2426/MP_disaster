@@ -51,13 +51,24 @@ def get_training_center_by_id(
 def create_training_center(
     center_in: schemas.TrainingCenterCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_roles(["ADMIN"])),
+    current_user: models.User = Depends(require_roles(["ADMIN", "TRAINER"])),
 ):
     data = (
         center_in.model_dump()
         if hasattr(center_in, "model_dump")
         else center_in.dict()
     )
+    if not data.get("latitude") or not data.get("longitude"):
+        from geo_resolver import resolve_coordinates
+        coords = resolve_coordinates(
+            district=data.get("district"),
+            location=data.get("address"),
+            name=data.get("centerName")
+        )
+        if coords:
+            data["latitude"] = coords[0]
+            data["longitude"] = coords[1]
+
     center = models.TrainingCenter(**data)
     db.add(center)
     db.commit()
@@ -70,7 +81,7 @@ def update_training_center(
     id: int,
     center_in: schemas.TrainingCenterUpdate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_roles(["ADMIN"])),
+    current_user: models.User = Depends(require_roles(["ADMIN", "TRAINER"])),
 ):
     center = db.query(models.TrainingCenter).filter(models.TrainingCenter.id == id).first()
     if not center:
@@ -86,6 +97,17 @@ def update_training_center(
     for key, value in data.items():
         if value is not None:
             setattr(center, key, value)
+
+    if not center.latitude or not center.longitude:
+        from geo_resolver import resolve_coordinates
+        coords = resolve_coordinates(
+            district=center.district,
+            location=center.address,
+            name=center.centerName
+        )
+        if coords:
+            center.latitude = coords[0]
+            center.longitude = coords[1]
 
     db.commit()
     db.refresh(center)

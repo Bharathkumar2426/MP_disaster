@@ -22,6 +22,7 @@ function Users() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [modalError, setModalError] = useState("");
   const [newUser, setNewUser] = useState({
     fullName: "",
     email: "",
@@ -33,7 +34,6 @@ function Users() {
   const loadUsers = async () => {
     try {
       const response = await getUsers();
-
       setUsers(response.data);
     } catch (error) {
       console.error("Error loading users:", error);
@@ -50,26 +50,20 @@ function Users() {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this user?",
     );
-
     if (!confirmDelete) return;
 
     try {
       await deleteUser(id);
-
-      alert("✅ User deleted successfully.");
-
       loadUsers();
     } catch (error) {
-      console.error(error);
-
-      alert("Failed to delete user.");
+      console.error("Failed to delete user:", error);
     }
   }
+
   function handleEdit(user) {
     setIsEditMode(true);
-
     setSelectedUserId(user.id);
-
+    setModalError("");
     setNewUser({
       fullName: user.fullName,
       email: user.email,
@@ -77,29 +71,22 @@ function Users() {
       phoneNumber: user.phoneNumber,
       role: user.role,
     });
-
     setShowModal(true);
   }
+
   async function handleSaveUser() {
     try {
+      setModalError("");
       if (isEditMode) {
         await updateUser(selectedUserId, newUser);
-
-        alert("✅ User updated successfully.");
       } else {
         await createUser(newUser);
-
-        alert("✅ User added successfully.");
       }
 
       loadUsers();
-
       setShowModal(false);
-
       setIsEditMode(false);
-
       setSelectedUserId(null);
-
       setNewUser({
         fullName: "",
         email: "",
@@ -109,10 +96,12 @@ function Users() {
       });
     } catch (error) {
       console.error(error);
-
-      alert("Operation failed.");
+      setModalError(
+        error?.response?.data?.detail || "Operation failed. Please verify input fields."
+      );
     }
   }
+
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -308,8 +297,24 @@ function Users() {
               </div>
 
               <div className="modal-body users-modal-body">
+                {modalError && (
+                  <div
+                    style={{
+                      background: "rgba(239, 68, 68, 0.15)",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      color: "#fca5a5",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      marginBottom: "16px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    ⚠ {modalError}
+                  </div>
+                )}
                 <div className="mb-3">
                   <label className="form-label">Full Name</label>
+
 
                   <input
                     type="text"
