@@ -13,7 +13,20 @@ Provides real-time crisis monitoring, explainable risk assessment, citizen distr
 
 ---
 
-## ⚡ Quick Links & Local Services
+## 🌐 Live Production Deployments (Render Cloud)
+
+The full-stack platform is live and operational:
+
+| Service | Live Deployment URL | Description | Status |
+| :--- | :--- | :--- | :--- |
+| **Frontend Web App** | [https://disaster-frontend-92h2.onrender.com](https://disaster-frontend-92h2.onrender.com) | Live Command Center & GIS Tactical UI | 🟢 **ONLINE** |
+| **Backend REST API** | [https://disaster-backend-9ygl.onrender.com](https://disaster-backend-9ygl.onrender.com) | Live FastAPI Production Service | 🟢 **ONLINE** |
+| **Swagger API Docs** | [https://disaster-backend-9ygl.onrender.com/docs](https://disaster-backend-9ygl.onrender.com/docs) | Interactive OpenAPI Test Console | 🟢 **ONLINE** |
+| **System Health Check** | [https://disaster-backend-9ygl.onrender.com/health](https://disaster-backend-9ygl.onrender.com/health) | Live System & Database Status | 🟢 **ONLINE** |
+
+---
+
+## ⚡ Localhost Development Services
 
 | Service | Local URL | Description | Default Status |
 | :--- | :--- | :--- | :--- |

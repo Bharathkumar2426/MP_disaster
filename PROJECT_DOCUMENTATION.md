@@ -34,6 +34,12 @@ The **AI Disaster Operations & Intelligent Incident Management Platform** is a f
 - **Evacuation Route Guidance**: Safe-route corridor calculation with active hazard proximity alerts.
 - **RakshaBot (रक्षाBot)**: An intelligent conversational safety assistant powered by Google Gemini, equipped with multi-intent classification and a data-grounded fallback engine.
 
+### Live Cloud Deployments (Render):
+- **Frontend Web App**: [https://disaster-frontend-92h2.onrender.com](https://disaster-frontend-92h2.onrender.com)
+- **Backend API Engine**: [https://disaster-backend-9ygl.onrender.com](https://disaster-backend-9ygl.onrender.com)
+- **Interactive OpenAPI Console**: [https://disaster-backend-9ygl.onrender.com/docs](https://disaster-backend-9ygl.onrender.com/docs)
+- **Production Healthcheck**: [https://disaster-backend-9ygl.onrender.com/health](https://disaster-backend-9ygl.onrender.com/health)
+
 ---
 
 ## 2. High-Level System Architecture
