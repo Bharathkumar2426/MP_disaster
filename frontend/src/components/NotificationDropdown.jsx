@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Bell, AlertTriangle, CheckCircle, Info, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function NotificationDropdown({ notifications = [], onClear }) {
+function NotificationDropdown({ notifications = [], onClear, onSelect }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -18,7 +18,19 @@ function NotificationDropdown({ notifications = [], onClear }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
+
+  const handleNotificationClick = (notif) => {
+    if (onSelect) {
+      onSelect(notif);
+    }
+    if (notif.link) {
+      navigate(notif.link);
+    } else if (notif.disasterId) {
+      navigate(`/?focus=${notif.disasterId}`);
+    }
+    setIsOpen(false);
+  };
 
   return (
     <div ref={dropdownRef} style={{ position: "relative" }}>
@@ -39,7 +51,7 @@ function NotificationDropdown({ notifications = [], onClear }) {
           cursor: "pointer",
           transition: "all 0.2s",
         }}
-        title="Notifications"
+        title="Incident Notifications"
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -73,7 +85,7 @@ function NotificationDropdown({ notifications = [], onClear }) {
             position: "absolute",
             top: "44px",
             right: "0",
-            width: "320px",
+            width: "340px",
             background: "#0f172a",
             border: "1px solid #1e293b",
             borderRadius: "10px",
@@ -95,6 +107,21 @@ function NotificationDropdown({ notifications = [], onClear }) {
           >
             <div style={{ fontWeight: "600", fontSize: "0.85rem", color: "#f8fafc" }}>
               Incident Notifications
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: "6px",
+                    fontSize: "0.7rem",
+                    padding: "1px 6px",
+                    borderRadius: "100px",
+                    background: "rgba(239, 68, 68, 0.2)",
+                    color: "#f87171",
+                    fontWeight: "700",
+                  }}
+                >
+                  {unreadCount} new
+                </span>
+              )}
             </div>
             {notifications.length > 0 && (
               <button
@@ -106,6 +133,7 @@ function NotificationDropdown({ notifications = [], onClear }) {
                   fontSize: "0.72rem",
                   cursor: "pointer",
                   padding: 0,
+                  fontWeight: "600",
                 }}
               >
                 Mark all read
@@ -114,56 +142,113 @@ function NotificationDropdown({ notifications = [], onClear }) {
           </div>
 
           {/* List */}
-          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+          <div style={{ maxHeight: "320px", overflowY: "auto" }}>
             {notifications.length === 0 ? (
               <div style={{ padding: "24px 16px", textAlign: "center", color: "#64748b", fontSize: "0.8rem" }}>
                 No active notifications
               </div>
             ) : (
-              notifications.map((notif, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    if (notif.link) navigate(notif.link);
-                    setIsOpen(false);
-                  }}
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid #1e293b",
-                    background: notif.read ? "transparent" : "rgba(37, 99, 235, 0.06)",
-                    cursor: "pointer",
-                    display: "flex",
-                    gap: "10px",
-                    alignItems: "flex-start",
-                    transition: "background 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#1e293b")}
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = notif.read ? "transparent" : "rgba(37, 99, 235, 0.06)")
-                  }
-                >
-                  <div style={{ marginTop: "2px", flexShrink: 0 }}>
-                    {notif.type === "HIGH" ? (
-                      <AlertTriangle size={15} color="#ef4444" />
-                    ) : notif.type === "SUCCESS" ? (
-                      <CheckCircle size={15} color="#10b981" />
-                    ) : (
-                      <Info size={15} color="#3b82f6" />
-                    )}
+              notifications.map((notif, idx) => {
+                const isRead = notif.read || notif.isRead;
+                const isHigh =
+                  (notif.severity || notif.type || "").toUpperCase() === "HIGH";
+
+                return (
+                  <div
+                    key={notif.id || idx}
+                    onClick={() => handleNotificationClick(notif)}
+                    style={{
+                      padding: "11px 14px",
+                      borderBottom: "1px solid #1e293b",
+                      background: isRead
+                        ? "transparent"
+                        : isHigh
+                        ? "rgba(239, 68, 68, 0.08)"
+                        : "rgba(37, 99, 235, 0.06)",
+                      borderLeft: !isRead
+                        ? isHigh
+                          ? "3px solid #ef4444"
+                          : "3px solid #3b82f6"
+                        : "3px solid transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "flex-start",
+                      transition: "background 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#1e293b")}
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = isRead
+                        ? "transparent"
+                        : isHigh
+                        ? "rgba(239, 68, 68, 0.08)"
+                        : "rgba(37, 99, 235, 0.06)")
+                    }
+                  >
+                    <div style={{ marginTop: "2px", flexShrink: 0 }}>
+                      {isHigh ? (
+                        <AlertTriangle size={15} color="#ef4444" />
+                      ) : notif.type === "SUCCESS" ? (
+                        <CheckCircle size={15} color="#10b981" />
+                      ) : (
+                        <Info size={15} color="#3b82f6" />
+                      )}
+                    </div>
+                    <div style={{ flexGrow: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "0.8rem",
+                          fontWeight: "600",
+                          color: isHigh ? "#fca5a5" : "#e2e8f0",
+                          marginBottom: "2px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: "4px",
+                        }}
+                      >
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {notif.title}
+                        </span>
+                        {notif.distanceKm !== undefined && notif.distanceKm !== null && (
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              fontWeight: "700",
+                              color: "#38bdf8",
+                              background: "rgba(56, 189, 248, 0.12)",
+                              border: "1px solid rgba(56, 189, 248, 0.3)",
+                              padding: "1px 5px",
+                              borderRadius: "4px",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {notif.distanceKm} km
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: "0.74rem", color: "#94a3b8", lineHeight: "1.3" }}>
+                        {notif.message}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "#64748b",
+                          marginTop: "4px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span>{notif.time || (notif.createdAt ? new Date(notif.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Active")}</span>
+                        <span style={{ color: "#60a5fa", fontSize: "0.68rem", fontWeight: "600" }}>
+                          View on Map →
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ flexGrow: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: "600", color: "#e2e8f0", marginBottom: "2px" }}>
-                      {notif.title}
-                    </div>
-                    <div style={{ fontSize: "0.74rem", color: "#94a3b8", lineHeight: "1.3" }}>
-                      {notif.message}
-                    </div>
-                    <div style={{ fontSize: "0.68rem", color: "#64748b", marginTop: "4px" }}>
-                      {notif.time || "Just now"}
-                    </div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

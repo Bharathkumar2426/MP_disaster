@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+import schemas
 from security import get_current_user
 import json
 import re
@@ -184,3 +185,58 @@ def disaster_copilot_assistant(
         )
 
     return {"response": response, "query": req.query}
+
+
+@router.post("/risk-assessment", response_model=schemas.RiskAssessmentResponse, summary="On-demand explainable risk assessment for coordinates")
+def assess_location_risk(
+    req: schemas.RiskAssessmentRequest,
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    On-demand explainable risk assessment for specified coordinates and disaster type.
+    Non-destructive: Does not create a disaster incident in the database.
+    Does not dispatch emergency notifications.
+    Uses PROVISIONAL_RULE_BASED_v1.0 based on real-time atmospheric telemetry.
+    """
+    from risk_service import evaluate_risk
+
+    name = f"{req.disasterType} assessment"
+    if req.district:
+        name += f" ({req.district})"
+
+    result = evaluate_risk(
+        disaster_type=req.disasterType,
+        latitude=req.latitude,
+        longitude=req.longitude,
+        disaster_id=None,
+        disaster_name=name,
+    )
+
+    return schemas.RiskAssessmentResponse(**result)
+
+
+@router.post("/chat", response_model=schemas.RakshaBotResponse, summary="RakshaBot AI Disaster Safety Assistant")
+@router.post("/rakshabot", response_model=schemas.RakshaBotResponse, summary="RakshaBot AI Disaster Safety Assistant (Alias)")
+def rakshabot_chat_endpoint(
+    req: schemas.RakshaBotRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """
+    Phase 8.1: RakshaBot — AI Disaster Assistance Chatbot
+    Provides conversational disaster preparedness, evacuation, emergency kit,
+    and first-aid advice grounded in real-time disaster, weather, and risk intelligence.
+    """
+    from rakshabot_service import generate_rakshabot_response
+
+    return generate_rakshabot_response(
+        message=req.message,
+        history=req.history,
+        user_id=current_user.id,
+        user=current_user,
+        db=db,
+        location=req.location,
+        latitude=req.latitude,
+        longitude=req.longitude,
+    )
+

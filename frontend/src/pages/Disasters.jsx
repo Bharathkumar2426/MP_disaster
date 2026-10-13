@@ -15,6 +15,7 @@ import {
   Trash2,
   X,
   MapPin,
+  ShieldAlert,
 } from "lucide-react";
 import {
   getDisasters,
@@ -22,6 +23,8 @@ import {
   updateDisaster,
   deleteDisaster,
 } from "../services/disasterService";
+import RiskAssessmentPanel from "../components/RiskAssessmentPanel";
+
 import { exportDisastersPDF, exportToCSV } from "../utils/reportGenerator";
 import { resolveCoordinates } from "../utils/geoResolver";
 
@@ -51,7 +54,9 @@ function Disasters() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedDisasterId, setSelectedDisasterId] = useState(null);
+  const [selectedRiskDisaster, setSelectedRiskDisaster] = useState(null);
   const [modalError, setModalError] = useState("");
+
 
   const [newDisaster, setNewDisaster] = useState({
     disasterName: "",
@@ -494,6 +499,26 @@ function Disasters() {
                   </td>
                   <td style={{ textAlign: "right" }}>
                     <div style={{ display: "inline-flex", gap: "6px" }}>
+                      <button
+                        onClick={() => setSelectedRiskDisaster(d)}
+                        style={{
+                          background: "rgba(168, 85, 247, 0.12)",
+                          border: "1px solid rgba(168, 85, 247, 0.35)",
+                          color: "#c084fc",
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                        }}
+                        title="View Explainable AI Risk Assessment"
+                      >
+                        <ShieldAlert size={13} />
+                        Risk
+                      </button>
                       {canManage && (
                         <button
                           onClick={() => handleEdit(d)}
@@ -718,6 +743,119 @@ function Disasters() {
                 onClick={handleSave}
               >
                 {isEditMode ? "Save Changes" : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phase 5: Explainable Disaster Risk Assessment Modal */}
+      {selectedRiskDisaster && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(10, 15, 30, 0.78)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "16px",
+          }}
+          onClick={() => setSelectedRiskDisaster(null)}
+        >
+          <div
+            style={{
+              background: "#0f172a",
+              border: "1px solid #334155",
+              borderRadius: "14px",
+              maxWidth: "540px",
+              width: "100%",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: "14px 18px",
+                background: "#1e293b",
+                borderBottom: "1px solid #334155",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                <ShieldAlert size={17} color="#c084fc" />
+                <div>
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: "14.5px",
+                      fontWeight: "700",
+                      color: "#f8fafc",
+                    }}
+                  >
+                    {selectedRiskDisaster.disasterName || "Incident Risk Assessment"}
+                  </h4>
+                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+                    {selectedRiskDisaster.district} • {selectedRiskDisaster.disasterType}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedRiskDisaster(null)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#94a3b8",
+                  cursor: "pointer",
+                  padding: "4px",
+                  borderRadius: "4px",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div>
+              <RiskAssessmentPanel
+                disasterId={selectedRiskDisaster.id}
+                hasCoords={Boolean(
+                  selectedRiskDisaster.latitude && selectedRiskDisaster.longitude
+                )}
+                compact={false}
+              />
+            </div>
+
+            <div
+              style={{
+                padding: "12px 18px",
+                background: "#0f172a",
+                borderTop: "1px solid #1e293b",
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <button
+                onClick={() => setSelectedRiskDisaster(null)}
+                style={{
+                  background: "#1e293b",
+                  border: "1px solid #334155",
+                  color: "#94a3b8",
+                  fontSize: "12px",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Close
               </button>
             </div>
           </div>

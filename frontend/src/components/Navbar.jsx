@@ -5,6 +5,12 @@ import NotificationDropdown from "./NotificationDropdown";
 import SOSModal from "./SOSModal";
 import api from "../services/api";
 
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "../services/notificationService";
+
 function Navbar() {
   const navigate = useNavigate();
   const [isSosOpen, setIsSosOpen] = useState(false);
@@ -17,47 +23,73 @@ function Navbar() {
     user = null;
   }
 
-  // Load recent high severity incidents as notifications
+  // Load real in-app user notifications with 30s polling
   useEffect(() => {
-    async function loadNotifications() {
+    let isMounted = true;
+    async function loadUserNotifications() {
       try {
-        const res = await api.get("/disasters");
-        if (Array.isArray(res.data)) {
-          const highSev = res.data
-            .filter((d) => d.severity?.toUpperCase() === "HIGH" || d.status?.toUpperCase() === "ACTIVE")
-            .slice(0, 5)
-            .map((d) => ({
-              id: d.id,
-              type: d.severity?.toUpperCase() === "HIGH" ? "HIGH" : "INFO",
-              title: d.disasterName || "Emergency Alert",
-              message: `Active incident reported in ${d.district || "district"}. Status: ${d.status || "ACTIVE"}`,
-              time: d.reportedDate ? new Date(d.reportedDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Active",
-              link: "/disasters",
-              read: false,
-            }));
-          setNotifications(highSev);
+        const data = await getNotifications();
+        if (isMounted && data && Array.isArray(data.notifications)) {
+          setNotifications(data.notifications);
         }
       } catch (err) {
-        // Fallback demo notifications
-        setNotifications([
-          {
-            id: 1,
-            type: "HIGH",
-            title: "Severe Weather Warning",
-            message: "Heavy rain advisory issued for coastal districts.",
-            time: "10m ago",
-            link: "/disasters",
-            read: false,
-          },
-        ]);
+        // Fallback to high severity disasters if offline
+        try {
+          const res = await api.get("/disasters");
+          if (isMounted && Array.isArray(res.data)) {
+            const highSev = res.data
+              .filter(
+                (d) =>
+                  d.severity?.toUpperCase() === "HIGH" ||
+                  d.status?.toUpperCase() === "ACTIVE"
+              )
+              .slice(0, 5)
+              .map((d) => ({
+                id: d.id,
+                disasterId: d.id,
+                type: d.severity?.toUpperCase() === "HIGH" ? "HIGH" : "INFO",
+                severity: d.severity,
+                title: d.disasterName || "Emergency Alert",
+                message: `Active incident in ${d.district || "district"}. Status: ${d.status || "ACTIVE"}`,
+                link: `/?focus=${d.id}`,
+                isRead: false,
+              }));
+            setNotifications(highSev);
+          }
+        } catch (e) {
+          // ignore
+        }
       }
     }
 
-    loadNotifications();
+    loadUserNotifications();
+    const interval = setInterval(loadUserNotifications, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
-  function handleClearNotifications() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  async function handleClearNotifications() {
+    try {
+      await markAllNotificationsAsRead();
+    } catch (e) {
+      console.warn("Error marking all read:", e);
+    }
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, isRead: true })));
+  }
+
+  async function handleSelectNotification(notif) {
+    if (notif?.id && !notif.isRead && !notif.read) {
+      try {
+        await markNotificationAsRead(notif.id);
+      } catch (e) {
+        console.warn("Error marking read:", e);
+      }
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, read: true, isRead: true } : n))
+      );
+    }
   }
 
   function logout() {
@@ -113,7 +145,11 @@ function Navbar() {
           </button>
 
           {/* Notifications Dropdown */}
-          <NotificationDropdown notifications={notifications} onClear={handleClearNotifications} />
+          <NotificationDropdown
+            notifications={notifications}
+            onClear={handleClearNotifications}
+            onSelect={handleSelectNotification}
+          />
 
           {/* User Profile */}
           {user && (

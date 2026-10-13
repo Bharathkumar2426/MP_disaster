@@ -3,6 +3,9 @@ import api from "./api";
 export const getTrainingPrograms = () =>
     api.get("/training-programs");
 
+export const getTrainingProgramById = (id) =>
+    api.get(`/training-programs/${id}`);
+
 export const createTrainingProgram = (program) =>
     api.post("/training-programs", program);
 

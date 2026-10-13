@@ -12,7 +12,7 @@ if os.path.exists(env_file):
     try:
         # pyrefly: ignore [missing-import]
         from dotenv import load_dotenv
-        load_dotenv(env_file)
+        load_dotenv(env_file, override=True)
     except ImportError:
         pass
 
@@ -21,7 +21,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from database import engine, Base, SessionLocal
+import models
 from seed import seed_database
+from migrations import run_migrations
+from gdacs_collector import get_gdacs_collector
 from routers import (
     auth,
     dashboard,
@@ -31,20 +34,31 @@ from routers import (
     users,
     ai,
     safety,
+    notifications,
+    community_reports,
+    routes,
 )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables and auto-seed initial database
+    # Startup: Create tables, run safe schema migrations, and auto-seed initial database
     Base.metadata.create_all(bind=engine)
+    run_migrations(engine)
     db = SessionLocal()
     try:
         seed_database(db)
     finally:
         db.close()
+
+    # Start GDACS background collector (non-blocking, graceful)
+    collector = get_gdacs_collector()
+    collector.start()
+
     yield
-    # Shutdown logic if needed
+
+    # Shutdown: Stop GDACS collector cleanly
+    await collector.stop()
 
 
 app = FastAPI(
@@ -85,6 +99,9 @@ app.include_router(training_programs.router)
 app.include_router(users.router)
 app.include_router(ai.router)
 app.include_router(safety.router)
+app.include_router(notifications.router)
+app.include_router(community_reports.router)
+app.include_router(routes.router)
 
 
 @app.get("/", tags=["Health"])
@@ -103,6 +120,7 @@ def root():
             "/api/users",
             "/api/ai",
             "/api/safety",
+            "/api/notifications",
         ],
     }
 

@@ -6,6 +6,7 @@ import Disasters from "./pages/Disasters";
 import TrainingCenters from "./pages/TrainingCenters";
 import TrainingPrograms from "./pages/TrainingPrograms";
 import SafetyPreparedness from "./pages/SafetyPreparedness";
+import CommunityRoutes from "./pages/CommunityRoutes";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
@@ -33,6 +34,17 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <SafetyPreparedness />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/community-routes"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <CommunityRoutes />
               </MainLayout>
             </ProtectedRoute>
           }

@@ -8,7 +8,11 @@ export const getSafetyTypes = () => api.get("/safety/types");
 export const getSafetyGuidance = (disasterType) =>
   api.get(`/safety/${encodeURIComponent(disasterType)}`);
 
+export const getSafetyRecommendations = (params = {}) =>
+  api.get("/safety/recommendations", { params });
+
 export default {
   getSafetyTypes,
   getSafetyGuidance,
+  getSafetyRecommendations,
 };

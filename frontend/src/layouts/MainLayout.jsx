@@ -1,5 +1,6 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import RakshaBot from "../components/RakshaBot";
 
 function MainLayout({ children }) {
     return (
@@ -34,6 +35,9 @@ function MainLayout({ children }) {
                 </div>
 
             </div>
+
+            {/* Floating RakshaBot Disaster Assistant */}
+            <RakshaBot />
 
         </div>
     );

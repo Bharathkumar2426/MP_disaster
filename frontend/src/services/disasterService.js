@@ -10,3 +10,9 @@ export const updateDisaster = (id, disaster) =>
 
 export const deleteDisaster = (id) =>
     api.delete(`/disasters/${id}`);
+
+export const getDisasterWeather = (id) =>
+    api.get(`/disasters/${id}/weather`);
+
+export const getDisasterRiskAssessment = (id) =>
+    api.get(`/disasters/${id}/risk-assessment`);

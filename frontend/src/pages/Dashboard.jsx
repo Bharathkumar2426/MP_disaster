@@ -1,12 +1,25 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import "../styles/dashboard.css";
 import api from "../services/api";
 import DashboardCharts from "../components/DashboardCharts";
 import DashboardCard from "../components/DashboardCard";
 import DisasterMap from "../components/DisasterMap";
 import AlertBanner from "../components/AlertBanner";
-import { Users, AlertTriangle, Building2, GraduationCap, ChevronRight, Activity, ShieldCheck } from "lucide-react";
+import LocationAlertWidget from "../components/LocationAlertWidget";
+import RiskAssessmentPanel from "../components/RiskAssessmentPanel";
+import { Users, AlertTriangle, Building2, GraduationCap, ChevronRight, Activity, ShieldCheck, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { Link } from "react-router-dom";
+
+function formatTimeAgo(date) {
+  if (!date) return "";
+  const diff = Date.now() - new Date(date).getTime();
+  const secs = Math.floor(diff / 1000);
+  const mins = Math.floor(diff / 60000);
+  if (secs < 30) return "Just now";
+  if (mins < 1) return `${secs}s ago`;
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.floor(mins / 60)}h ago`;
+}
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState({
@@ -20,66 +33,131 @@ function Dashboard() {
   const [allCenters, setAllCenters] = useState([]);
   const [recentPrograms, setRecentPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [error, setError] = useState(null);
 
-  const loadAllData = useCallback(async () => {
-      try {
-        setLoading(true);
+  // Phase 4: Location Alert Zone & Incident Focus State
+  const [userAlertLocation, setUserAlertLocation] = useState(null);
+  const [focusedIncidentId, setFocusedIncidentId] = useState(null);
+  // Phase 5: Selected Incident for Explainable Risk Assessment
+  const [selectedRiskDisaster, setSelectedRiskDisaster] = useState(null);
 
-        const [dashRes, disastersRes, centersRes, programsRes] = await Promise.allSettled([
-          api.get("/dashboard"),
-          api.get("/disasters"),
-          api.get("/training-centers"),
-          api.get("/training-programs"),
-        ]);
 
-        if (dashRes.status === "fulfilled" && dashRes.value?.data) {
-          setDashboard(dashRes.value.data);
-        }
+  const handleFocusIncident = (id) => {
+    setFocusedIncidentId(id);
+    const mapElement = document.getElementById("disaster-map-section");
+    if (mapElement) {
+      mapElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
-        let fetchedDisasters = [];
-        if (disastersRes.status === "fulfilled" && Array.isArray(disastersRes.value?.data)) {
-          fetchedDisasters = disastersRes.value.data;
-          setAllDisasters(fetchedDisasters);
-        }
+  const isFetchingRef = useRef(false);
 
-        let fetchedCenters = [];
-        if (centersRes.status === "fulfilled" && Array.isArray(centersRes.value?.data)) {
-          fetchedCenters = centersRes.value.data;
-          setAllCenters(fetchedCenters);
-        }
+  const refreshData = useCallback(async (isBackground = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
 
-        if (programsRes.status === "fulfilled" && Array.isArray(programsRes.value?.data)) {
-          setRecentPrograms(programsRes.value.data);
-        }
+    if (!isBackground) {
+      setLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
 
-        // Compute counts if dashboard API didn't provide them
-        setDashboard((prev) => ({
-          totalUsers: prev.totalUsers || 12,
-          totalDisasters: prev.totalDisasters || fetchedDisasters.length || 6,
-          totalTrainingCenters: prev.totalTrainingCenters || fetchedCenters.length || 4,
-          totalTrainingPrograms: prev.totalTrainingPrograms || 8,
-        }));
-      } catch (error) {
-        console.error("Dashboard Load Error:", error);
-      } finally {
-        setLoading(false);
+    try {
+      const [dashRes, disastersRes, centersRes, programsRes] = await Promise.allSettled([
+        api.get("/dashboard"),
+        api.get("/disasters"),
+        api.get("/training-centers"),
+        api.get("/training-programs"),
+      ]);
+
+      let fetchedDisasters = [];
+      if (disastersRes.status === "fulfilled" && Array.isArray(disastersRes.value?.data)) {
+        fetchedDisasters = disastersRes.value.data;
+        setAllDisasters(fetchedDisasters);
       }
-    }, []);
 
+      let fetchedCenters = [];
+      if (centersRes.status === "fulfilled" && Array.isArray(centersRes.value?.data)) {
+        fetchedCenters = centersRes.value.data;
+        setAllCenters(fetchedCenters);
+      }
+
+      let fetchedPrograms = [];
+      if (programsRes.status === "fulfilled" && Array.isArray(programsRes.value?.data)) {
+        fetchedPrograms = programsRes.value.data;
+        setRecentPrograms(fetchedPrograms);
+      }
+
+      const dashData = dashRes.status === "fulfilled" ? dashRes.value?.data : null;
+      setDashboard({
+        totalUsers: dashData?.totalUsers ?? 12,
+        totalDisasters: fetchedDisasters.length,
+        totalTrainingCenters: fetchedCenters.length,
+        totalTrainingPrograms: dashData?.totalTrainingPrograms ?? fetchedPrograms.length,
+      });
+
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      console.error("Dashboard Load Error:", err);
+      if (!isBackground) {
+        setError("Failed to load operations telemetry. Please check server connectivity.");
+      }
+    } finally {
+      isFetchingRef.current = false;
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // Single unified 30s polling cycle; prevents duplicate timers and overlapping calls
   useEffect(() => {
-    loadAllData();
-    // Auto-refresh every 30 seconds for live map data
+    refreshData(false);
     const interval = setInterval(() => {
-      api.get("/disasters").then(r => { if (Array.isArray(r?.data)) setAllDisasters(r.data); }).catch(() => {});
-      api.get("/training-centers").then(r => { if (Array.isArray(r?.data)) setAllCenters(r.data); }).catch(() => {});
+      refreshData(true);
     }, 30000);
     return () => clearInterval(interval);
-  }, [loadAllData]);
+  }, [refreshData]);
 
   return (
     <div className="container-fluid px-0">
       {/* Alert Banner for Active High Severity Disasters */}
       <AlertBanner activeDisasters={allDisasters} />
+
+      {/* Error state alert if initial fetch fails */}
+      {error && (
+        <div style={{
+          background: "rgba(239, 68, 68, 0.15)",
+          border: "1px solid rgba(239, 68, 68, 0.35)",
+          borderRadius: "8px",
+          padding: "10px 16px",
+          color: "#fca5a5",
+          fontSize: "13px",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}>
+          <span>{error}</span>
+          <button
+            onClick={() => refreshData(false)}
+            style={{
+              background: "#ef4444",
+              border: "none",
+              color: "#fff",
+              padding: "4px 10px",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "12px",
+              fontWeight: "600",
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="dashboard-header d-flex justify-content-between align-items-center mb-4">
@@ -89,7 +167,33 @@ function Dashboard() {
             Real-time disaster telemetry, GIS incident mapping, and training relief coordination.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          {/* Manual Refresh Button & Live Status */}
+          <button
+            onClick={() => refreshData(false)}
+            disabled={isRefreshing}
+            style={{
+              background: "rgba(30, 41, 59, 0.7)",
+              color: "#cbd5e1",
+              border: "1px solid #334155",
+              padding: "7px 12px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: isRefreshing ? "wait" : "pointer",
+              transition: "all 0.15s ease",
+            }}
+            title="Refresh live incident telemetry"
+          >
+            <RefreshCw size={13} style={{ animation: isRefreshing ? "mapSpin 0.8s linear infinite" : "none" }} />
+            {isRefreshing ? "Syncing..." : "Refresh"}
+          </button>
+          <span style={{ fontSize: "11px", color: "#64748b", marginRight: "4px" }}>
+            Updated {formatTimeAgo(lastUpdated)}
+          </span>
           <Link
             to="/safety"
             style={{
@@ -167,9 +271,23 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Personal Alert Zone & Nearby Incidents Widget */}
+      <LocationAlertWidget
+        onFocusIncident={handleFocusIncident}
+        onLocationChange={setUserAlertLocation}
+      />
+
       {/* GIS Interactive Incident Map */}
-      <div className="mb-4">
-        <DisasterMap disasters={allDisasters} centers={allCenters} />
+      <div id="disaster-map-section" className="mb-4">
+        <DisasterMap
+          disasters={allDisasters}
+          centers={allCenters}
+          lastUpdated={lastUpdated}
+          onRefresh={() => refreshData(false)}
+          isRefreshing={isRefreshing}
+          focusedDisasterId={focusedIncidentId}
+          userAlertLocation={userAlertLocation}
+        />
       </div>
 
       {/* Live Computed Charts */}
@@ -204,6 +322,7 @@ function Dashboard() {
                     <th>District</th>
                     <th>Severity</th>
                     <th>Status</th>
+                    <th style={{ textAlign: "right" }}>Risk Assessment</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -236,11 +355,33 @@ function Dashboard() {
                           {disaster.status || "ACTIVE"}
                         </span>
                       </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button
+                          onClick={() => setSelectedRiskDisaster(disaster)}
+                          style={{
+                            background: "rgba(168, 85, 247, 0.15)",
+                            border: "1px solid rgba(168, 85, 247, 0.4)",
+                            color: "#c084fc",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            padding: "3px 8px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                          title="Assess explainable disaster risk"
+                        >
+                          <ShieldAlert size={12} />
+                          Assess
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {allDisasters.length === 0 && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
                         No incidents currently logged.
                       </td>
                     </tr>
@@ -303,6 +444,138 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Phase 5: Explainable Disaster Risk Assessment Modal */}
+      {selectedRiskDisaster && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(10, 15, 30, 0.78)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "16px",
+          }}
+          onClick={() => setSelectedRiskDisaster(null)}
+        >
+          <div
+            style={{
+              background: "#0f172a",
+              border: "1px solid #334155",
+              borderRadius: "14px",
+              maxWidth: "540px",
+              width: "100%",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: "14px 18px",
+                background: "#1e293b",
+                borderBottom: "1px solid #334155",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                <ShieldAlert size={17} color="#c084fc" />
+                <div>
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: "14.5px",
+                      fontWeight: "700",
+                      color: "#f8fafc",
+                    }}
+                  >
+                    {selectedRiskDisaster.disasterName || "Incident Risk Assessment"}
+                  </h4>
+                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+                    {selectedRiskDisaster.district} • {selectedRiskDisaster.disasterType}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedRiskDisaster(null)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#94a3b8",
+                  cursor: "pointer",
+                  padding: "4px",
+                  borderRadius: "4px",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div>
+              <RiskAssessmentPanel
+                disasterId={selectedRiskDisaster.id}
+                hasCoords={Boolean(
+                  selectedRiskDisaster.latitude && selectedRiskDisaster.longitude
+                )}
+                compact={false}
+              />
+            </div>
+
+            <div
+              style={{
+                padding: "12px 18px",
+                background: "#0f172a",
+                borderTop: "1px solid #1e293b",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <button
+                onClick={() => {
+                  const id = selectedRiskDisaster.id;
+                  setSelectedRiskDisaster(null);
+                  handleFocusIncident(id);
+                }}
+                style={{
+                  background: "#3b82f6",
+                  border: "none",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Focus On GIS Map
+              </button>
+              <button
+                onClick={() => setSelectedRiskDisaster(null)}
+                style={{
+                  background: "#1e293b",
+                  border: "1px solid #334155",
+                  color: "#94a3b8",
+                  fontSize: "12px",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
