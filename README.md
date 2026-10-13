@@ -1,124 +1,153 @@
-# 🌍 AI Disaster Operations & Response Management System
+# 🌍 AI Disaster Preparedness & Intelligent Incident Management Platform
 
-A mission-critical full-stack emergency response and tactical operations platform built using **FastAPI (Python)**, **React 19 (Vite)**, **Leaflet GIS Spatial Engine**, and **AI Automation**. Engineered to monitor real-time crises, assess damage, coordinate relief centers, automate triage, and provide life-saving situational awareness.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19_Vite-61DAFB.svg?logo=react&logoColor=black)](https://react.dev/)
+[![Gemini AI](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4.svg?logo=google&logoColor=white)](https://ai.google.dev/)
+[![Open-Meteo](https://img.shields.io/badge/Open--Meteo-Live_Telemetry-FF6B6B.svg)](https://open-meteo.com/)
+[![GDACS](https://img.shields.io/badge/GDACS-Live_Sync-2ECC71.svg)](https://www.gdacs.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+An enterprise-grade, mission-critical emergency operations, disaster preparedness, and incident management platform. Engineered with **FastAPI (Python)**, **React 19 (Vite)**, **Leaflet GIS Spatial Engine**, **Open-Meteo Telemetry**, **GDACS Global Feeds**, and **Google Gemini AI**.
+
+Provides real-time crisis monitoring, explainable risk assessment, citizen distress reporting, safe evacuation corridor routing, authoritative preparedness training, and **RakshaBot (रक्षाBot)** — an intelligent AI disaster assistant.
 
 ---
 
-## ⚡ Current Status & Live Localhost URLs
+## ⚡ Quick Links & Local Services
 
-Both frontend and backend microservices are fully configured, seeded, and active in the local development environment:
-
-| Service | Localhost URL | Description | Status |
+| Service | Local URL | Description | Default Status |
 | :--- | :--- | :--- | :--- |
-| **Frontend Web App** | [http://localhost:5173](http://localhost:5173) | Reactive Command Center & Tactical GIS UI | 🟢 **ACTIVE** |
-| **Backend REST API** | [http://localhost:8080](http://localhost:8080) | Asynchronous FastAPI ASGI Engine | 🟢 **ACTIVE** |
-| **Swagger API Docs** | [http://localhost:8080/docs](http://localhost:8080/docs) | Interactive OpenAPI / Swagger UI Test Console | 🟢 **ACTIVE** |
-| **ReDoc API Reference** | [http://localhost:8080/redoc](http://localhost:8080/redoc) | Alternative Clean API Specifications | 🟢 **ACTIVE** |
+| **Frontend Web App** | [http://localhost:5173](http://localhost:5173) | Reactive Command Center & Tactical UI | 🟢 **ACTIVE** |
+| **Backend REST API** | [http://localhost:8080](http://localhost:8080) | Asynchronous FastAPI Engine | 🟢 **ACTIVE** |
+| **Swagger API Docs** | [http://localhost:8080/docs](http://localhost:8080/docs) | Interactive OpenAPI Test Console | 🟢 **ACTIVE** |
+| **ReDoc Reference** | [http://localhost:8080/redoc](http://localhost:8080/redoc) | Clean API Specifications | 🟢 **ACTIVE** |
+| **Health Check** | [http://localhost:8080/health](http://localhost:8080/health) | System & Database Health Endpoint | 🟢 **ACTIVE** |
 
 ---
 
-## 📖 About the Project
+## 🌟 Key Platform Capabilities
 
-The AI Disaster Operations & Response Management System bridges the gap between chaotic on-the-ground disaster reporting, tactical emergency dispatch, and citizen safety. It delivers automated damage severity assessment, structured voice SOS parsing, interactive spatial threat mapping, situation report (SitRep) generation, and role-based incident tracking.
+### 1. 🤖 RakshaBot (रक्षाBot) — AI Disaster Safety Assistant
+- **Google Gemini Integration**: Context-aware natural language assistant powered by `gemini-2.5-flash-lite` and `gemini-2.5-flash`.
+- **Grounded in Platform Telemetry**: Responses are strictly grounded in live database records, GDACS feeds, Open-Meteo observations, and NDMA guidelines.
+- **Multi-Intent Architecture**: Independent processing for live disasters, location-specific queries, meteorological observations, training programs, and safety guidelines.
+- **Fail-Safe Direct Telemetry Fallback**: If Gemini hits API rate limits (HTTP 429) or is offline, RakshaBot smoothly switches to an evidence-grounded fallback engine without failing or repeating templates.
+- **Floating Command Panel**: Minimizable launcher, quick prompt chips, session history sync, and emergency contact banners.
 
----
+### 2. 🗺️ Interactive GIS Tactical Spatial Map
+- **Live Incident Visualization**: Dynamic Leaflet maps with severity threat radii (Low: 8 km, Medium: 14 km, High: 22 km).
+- **GDACS Live Feed Overlay**: Global Disaster Alert and Coordination System feeds synced automatically in the background.
+- **Shelter & Relief Pins**: Interactive relief hubs showing capacity, coordinator contacts, and distance calculations.
 
-## ✨ Features Implemented
+### 3. 🌤️ Real-Time Meteorological Telemetry & Provisional Risk Engine
+- **Open-Meteo Integration**: Live temperature, humidity, precipitation, wind speed, and gust telemetry without requiring paid API keys.
+- **Explainable Risk Assessment (`PROVISIONAL_RULE_BASED_v1.0`)**: Deterministic, physical trigger-based risk scores (0–100) and hazard categories (LOW, MEDIUM, HIGH, CRITICAL). Explicitly states statistical probability is NULL to avoid misleading route safety claims.
 
-- 🗺️ **Interactive GIS Spatial Map**: High-contrast Leaflet & OpenStreetMap tactical map featuring dynamic threat buffers (8 km LOW, 14 km MEDIUM, 22 km HIGH severity radiuses), shelter capacity pins, and auto-centering.
-- 📍 **Autonomous Geocoding Engine**: Built-in 300+ district coordinate registry (`backend/geo_resolver.py` and `frontend/src/utils/geoResolver.js`) that auto-resolves latitude and longitude from location and district names across Indian states, with optional manual GIS precision override.
-- 🤖 **AI Operations Grid**: 
-  - **Multimodal Damage Assessment**: Evaluates damage text and incident imagery to classify disaster type, damage level, confidence score, and recommended rescue teams.
-  - **Voice SOS Incident Extractor**: Converts citizen distress audio/transcripts into structured incident JSON.
-  - **24/7 AI Triage Copilot**: Tactical assistant providing emergency first aid protocols and searching nearby relief shelters.
-- 📄 **Official SitRep Exporter**: One-click generation of timestamped PDF Situation Reports conforming to emergency command standards (`jsPDF` + `AutoTable`) and instant CSV dataset downloads.
-- 🚨 **Real-Time Notification System**: Live ticker alerting personnel of active high-severity incidents, coupled with an interactive alert drawer.
-- 🆘 **Emergency SOS Directory & GPS Dispatch**: One-click device GPS coordinate grabber and clipboard copier, alongside instant-dial national emergency hotlines.
-- 📋 **Safety Preparedness & Checklist Engine**: Comprehensive hazard action guides (Before, During, After) for Floods, Cyclones, Earthquakes, Fires, Landslides, and Heatwaves with persisted local emergency kit checklist items.
-- 📊 **Dynamic Analytics Dashboard**: Live visual breakdown of incident severity, district risk distributions, operational status, and active relief hubs.
-- 👥 **Full Entity Management (CRUD)**: Disasters, Relief/Training Centers, Preparedness Programs (with relational center dropdown selection), and User RBAC.
-- 🔐 **Secure Role-Based Authentication**: Salted Bcrypt password hashing and signed JWT bearer tokens (`ADMIN`, `TRAINER`, `PARTICIPANT`).
-- 🎨 **Modern Non-blocking UI**: Elegant command-center dark mode and glassmorphism styling with inline validation and error banners replacing intrusive browser alerts.
+### 4. 🛣️ Safe-Route Evacuation Guidance
+- **Corridor Hazard Scanning**: Calculates driving routes via OSRM (or geodesic fallback) and scans for active hazards within customizable buffer zones (5–50 km).
+- **Proximity Categorization**: Highlights intersecting crisis zones and alerts responders to impassable corridors.
+
+### 5. 👥 Citizen Community Reporting & Verification Workflow
+- **Crowdsourced Intelligence**: Verified role-based reporting for localized waterlogging, tree falls, and roadblocks.
+- **Verification RBAC**: Participants can submit reports; certified Responders and Admins verify reports before inclusion in official feeds.
+
+### 6. 🎓 Preparedness Training & Relief Hub Directory
+- **Course Management**: Training programs for flood rescue, fire escape, and earthquake survival with participant capacity tracking.
+- **Relief Shelters**: Verified directory of safe relief centers, capacity tracking, and direct station desk helplines.
+
+### 7. 📄 Official SitRep PDF & CSV Export Engine
+- **Instant Documentation**: One-click generation of timestamped Situation Reports (SitRep) using `jsPDF` and `AutoTable` for emergency briefings.
 
 ---
 
 ## 🛠 Technology Stack
 
 ### Frontend
-- **Framework**: React.js 19 (Vite)
-- **Spatial Mapping**: Leaflet & React-Leaflet
-- **Reporting Engine**: jsPDF & jsPDF-AutoTable
-- **UI & Icons**: Lucide React, Bootstrap 5, Recharts
-- **Networking**: Axios with automatic Bearer JWT injection
-- **Routing**: React Router DOM (with protected route guards)
+- **Framework**: React 19 (Vite)
+- **Mapping & GIS**: Leaflet, React-Leaflet
+- **Styling**: Vanilla CSS, Glassmorphism Design System, Lucide React
+- **HTTP Client**: Axios (with automatic Bearer JWT injection & timeout protection)
+- **State & Storage**: React Context, SessionStorage, LocalStorage
 
 ### Backend
-- **Engine**: Python 3.10+ / FastAPI (Asynchronous ASGI)
-- **Database**: SQLite (local default) / PostgreSQL ready with SQLAlchemy 2.0 ORM
-- **Security**: JWT Authentication (`python-jose`) & Bcrypt password hashing (`passlib`)
-- **Server**: Uvicorn ASGI Web Server & Gunicorn
-- **Validation**: Pydantic v2 schemas
+- **Core Engine**: Python 3.11+ / FastAPI (Asynchronous ASGI)
+- **Database**: SQLite (default local) / PostgreSQL (production ready via SQLAlchemy 2.0 ORM)
+- **AI Engine**: Google Gemini API via REST
+- **External Feeds**: GDACS (Global Disaster Alert & Coordination System), Open-Meteo
+- **Routing**: Open Source Routing Machine (OSRM) + Geodesic Corridor Fallback
+- **Security**: JWT Bearer Tokens (`python-jose`), Salted Bcrypt Hashing (`passlib`)
+- **Server**: Uvicorn ASGI Server / Gunicorn for production
 
 ---
 
 ## 🔑 Default Test Accounts
 
-The local database auto-seeds test accounts on startup:
+The platform automatically seeds initial test credentials on first launch:
 
 | Role | Email Address | Password | Permissions & Scope |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@disaster.com` | `admin123` | Full access: Manage disasters, centers, programs, and edit user roles |
-| **Trainer** | `trainer@disaster.com` | `trainer123` | Operational access: Report incidents, schedule training programs, view maps |
-| **Participant** | `user@disaster.com` | `user123` | Citizen access: View maps, checklists, AI Copilot, emergency SOS |
+| **Admin** | `admin@disaster.com` | `admin123` | Full access: Incident management, centers, programs, user RBAC, verification |
+| **Trainer / Responder** | `trainer@disaster.com` | `trainer123` | Operational access: Report incidents, verify community reports, manage courses |
+| **Participant / Citizen**| `user@disaster.com` | `user123` | Public access: Live map, report incidents, RakshaBot, emergency SOS |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Python 3.10+**
-- **Node.js 18+ (LTS)**
+- **Python 3.10+** (Python 3.11 recommended)
+- **Node.js 18+** (Node 20 LTS recommended)
 - **Git**
 
 ---
 
 ### 1. ⚙️ Backend Setup (FastAPI)
 
-1. Navigate to the backend directory:
+1. Open a terminal and navigate to the `backend` directory:
    ```bash
    cd backend
    ```
 
-2. Activate the Python virtual environment:
+2. Create and activate a virtual environment:
    ```powershell
-   # Windows
-   .\venv\Scripts\activate
+   # Windows PowerShell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
 
    # Linux / macOS
+   python3 -m venv venv
    source venv/bin/activate
    ```
 
-3. Install required Python packages (if not already installed):
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Run the backend server:
-   ```powershell
+4. Configure your `.env` file:
+   ```bash
+   # Copy example template
+   copy .env.example .env     # Windows
+   cp .env.example .env       # Linux/macOS
+   ```
+   Add your `GEMINI_API_KEY` to `.env` to enable RakshaBot AI synthesis.
+
+5. Start the backend development server:
+   ```bash
    python run.py
    # Runs on http://localhost:8080
    ```
 
 ---
 
-### 2. 💻 Frontend Setup (React Vite)
+### 2. 💻 Frontend Setup (React / Vite)
 
-1. In a separate terminal, navigate to the frontend directory:
+1. In a separate terminal, navigate to the `frontend` directory:
    ```bash
    cd frontend
    ```
 
-2. Install dependencies (if not already installed):
+2. Install dependencies:
    ```bash
    npm install
    ```
@@ -129,6 +158,8 @@ The local database auto-seeds test accounts on startup:
    # Runs on http://localhost:5173
    ```
 
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
 ---
 
 ## 📂 Project Structure
@@ -136,99 +167,86 @@ The local database auto-seeds test accounts on startup:
 ```text
 disaster-management-system/
 ├── backend/
-│   ├── data/
-│   │   └── disaster.db               # Local SQLite database
+│   ├── data/                         # Local database storage & safety catalogs
+│   │   ├── safety_data.py            # Authoritative NDMA disaster safety guidelines
+│   │   └── disaster_db.sqlite3       # Local development SQLite database
 │   ├── routers/
-│   │   ├── ai.py                     # AI Multimodal damage, Voice SOS, and Copilot
-│   │   ├── auth.py                   # User registration and JWT login
-│   │   ├── dashboard.py              # Aggregated metrics and live counters
-│   │   ├── disasters.py              # Incident lifecycle, CRUD, filtering & search
-│   │   ├── safety.py                 # Emergency directory, checklists, guidelines
-│   │   ├── training_centers.py       # Relief shelter hubs & coordinator contact
+│   │   ├── ai.py                     # RakshaBot endpoints, damage assessment, copilot
+│   │   ├── auth.py                   # User registration, JWT login, and profile
+│   │   ├── community_reports.py      # Crowdsourced incident reports & verification
+│   │   ├── dashboard.py              # Aggregated metrics, incident counters
+│   │   ├── disasters.py              # Incident CRUD, filters, GDACS status, weather
+│   │   ├── notifications.py          # Alert notifications & polling
+│   │   ├── routes.py                 # OSRM Safe-route calculation & hazard corridor scan
+│   │   ├── safety.py                 # Emergency directory, checklists, recommendations
+│   │   ├── training_centers.py       # Relief shelters & hubs management
 │   │   ├── training_programs.py      # Community preparedness training sessions
 │   │   └── users.py                  # User management and role modification
 │   ├── database.py                   # SQLAlchemy engine, session maker, base model
-│   ├── geo_resolver.py               # 300+ Indian district coordinates resolver
+│   ├── disaster_upsert.py            # Deduplicated incident upsert utility
+│   ├── gdacs_collector.py            # Asynchronous GDACS feed polling collector
+│   ├── location_service.py           # Indian district coordinate resolver & Haversine formula
 │   ├── main.py                       # FastAPI entrypoint, CORS configuration, lifecycle
 │   ├── models.py                     # SQLAlchemy ORM entity models
-│   ├── requirements.txt              # Backend Python dependencies
-│   ├── run.py                        # Uvicorn launcher (Port 8080)
-│   ├── schemas.py                    # Pydantic validation schemas
-│   ├── security.py                   # Password hashing, JWT token verification, RBAC guard
-│   ├── seed.py                       # Auto-seeding initial dataset
-│   └── .env                          # Local environment variables
+│   ├── rakshabot_service.py          # RakshaBot AI engine (Gemini + Grounded Fallback)
+│   ├── recommendation_service.py     # Rule-based safety recommendation engine
+│   ├── risk_service.py               # Explainable provisional risk assessment engine
+│   ├── routing_service.py            # OSRM road routing & hazard buffer analysis
+│   ├── schemas.py                    # Pydantic v2 request/response validation schemas
+│   ├── security.py                   # JWT verification, password hashing, RBAC guards
+│   ├── weather_service.py            # Open-Meteo physical meteorological API client
+│   └── run.py                        # Uvicorn launcher (Port 8080)
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── AlertBanner.jsx       # Real-time incident banner ticker
-│   │   │   ├── Counter.jsx           # Animated numerical statistics
-│   │   │   ├── DashboardCard.jsx     # Overview analytical metric cards
-│   │   │   ├── DashboardCharts.jsx   # Severity and district distribution charts
-│   │   │   ├── DisasterMap.jsx       # Leaflet interactive GIS spatial map
-│   │   │   ├── LoadingSpinner.jsx    # Accessible loading indicators
-│   │   │   ├── Navbar.jsx            # Navigation bar with SOS trigger
-│   │   │   ├── NotificationDropdown.jsx # Real-time alerts notification popover
-│   │   │   ├── ProtectedRoute.jsx    # Role-based route authorization guard
-│   │   │   ├── Sidebar.jsx           # Command center navigation drawer
+│   │   │   ├── DisasterMap.jsx       # Interactive Leaflet GIS spatial map
+│   │   │   ├── LocationAlertWidget.jsx # User GPS alert zone status badge
+│   │   │   ├── Navbar.jsx            # Command center top bar with SOS trigger
+│   │   │   ├── NotificationDropdown.jsx # Real-time alerts popover
+│   │   │   ├── RakshaBot.jsx         # Floating AI Disaster Assistant panel
+│   │   │   ├── RiskAssessmentPanel.jsx# Live on-demand risk assessment widget
+│   │   │   ├── Sidebar.jsx           # Command navigation drawer
 │   │   │   └── SOSModal.jsx          # Emergency hotline & GPS location copier
-│   │   ├── layouts/
-│   │   │   └── MainLayout.jsx        # Shell layout integrating Navbar, Sidebar, and Ticker
 │   │   ├── pages/
-│   │   │   ├── Dashboard.jsx         # Executive command dashboard with live feeds
+│   │   │   ├── Dashboard.jsx         # Executive command dashboard
 │   │   │   ├── Disasters.jsx         # Incident grid, filter engine, modal form, export
-│   │   │   ├── Login.jsx             # Secure authentication portal
-│   │   │   ├── NotFound.jsx          # Custom 404 error page
-│   │   │   ├── Register.jsx          # New user registration portal
-│   │   │   ├── SafetyPreparedness.jsx# Interactive checklists, guidelines, protocols
+│   │   │   ├── CommunityRoutes.jsx   # Safe-route evacuation guidance & corridor scan
+│   │   │   ├── SafetyPreparedness.jsx# Hazard checklists and action guides
 │   │   │   ├── TrainingCenters.jsx   # Relief shelter & center management
-│   │   │   ├── TrainingPrograms.jsx  # Preparedness courses & relational enrollment
-│   │   │   └── Users.jsx             # Admin user administration table
+│   │   │   └── TrainingPrograms.jsx  # Preparedness courses & enrollment
 │   │   ├── services/                 # Axios API services
-│   │   ├── utils/
-│   │   │   ├── geoResolver.js        # Frontend district coordinate mapper
-│   │   │   └── reportGenerator.js    # jsPDF SitRep and CSV exporter
+│   │   ├── styles/                   # Modular CSS stylesheets
 │   │   ├── App.jsx                   # Application routing definitions
-│   │   └── index.css                 # Global styling and CSS tokens
+│   │   └── index.css                 # Global styling and CSS design tokens
 │   ├── package.json                  # Node dependencies & scripts
 │   └── vite.config.js                # Vite build configuration
-├── PROJECT_DOCUMENTATION.md          # Comprehensive architecture & API documentation
+├── .env.example                      # Root environment variable template
 ├── render.yaml                       # Cloud infrastructure deployment blueprint
-└── README.md                         # Project documentation
+└── README.md                         # Project overview and instructions
 ```
 
 ---
 
-## 📈 Recent Progress & Milestones Achieved
+## 🌐 Production Deployment (Render)
 
-1. **Autonomous Geographic Resolution (`geo_resolver`)**:
-   - Integrated a 300+ district coordinate registry for India covering states including Himachal Pradesh, Uttarakhand, Tamil Nadu, Kerala, Karnataka, Maharashtra, Delhi, and more.
-   - Disasters and relief centers now automatically resolve GIS coordinates upon entry without requiring manual latitude/longitude input.
-   - Added manual GIS coordinate fields and interactive target coordinate badges on incident creation/update dialogs.
-2. **Relational Form Integration**:
-   - Upgraded Training Programs form to include a live dropdown selector linking directly to available Relief Centers instead of requiring manual numeric ID input.
-   - Implemented persistent enrollment tracking via `localStorage`.
-3. **Enhanced User Experience & Error Handling**:
-   - Replaced browser `alert()` popups across Login, Register, Users, Disasters, Training Centers, and Training Programs with inline glassmorphic error/status banners displaying backend validation details directly.
-4. **Verified Full-Stack Health**:
-   - Backend successfully verified on port 8080 (`/health` returning 200 OK).
-   - Frontend development server successfully verified on port 5173.
-   - Auto-seeding confirmed functional with default test credentials.
+The project includes a ready-to-use [`render.yaml`](file:///d:/disaster-management-system-main/disaster-management-system-main/render.yaml) configuration for 1-click deployment on **Render**:
 
----
+1. **Backend Web Service**:
+   - Runtime: `Python 3.11`
+   - Build: `pip install -r requirements.txt`
+   - Start: `gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT`
+   - Database: Connect to a managed PostgreSQL database (e.g., Neon or Render Postgres) via `DATABASE_URL`.
+2. **Frontend Static Site**:
+   - Runtime: `Node 20`
+   - Build: `npm install && npm run build`
+   - Publish: `dist`
+   - Routing: Single-page application rewrites via `frontend/public/_redirects`.
 
-## 🔮 Next Steps & Continuation Roadmap
-
-Here are recommended next steps to build upon current progress:
-
-- [ ] **Live WebSocket Alert Broadcasts**: Implement WebSocket channel (`/ws/alerts`) in FastAPI so when new disasters are logged, all active client map screens update in real time without refreshing.
-- [ ] **External Weather & Storm API Integration**: Connect backend to NOAA Climate or OpenWeather API to overlay real-time precipitation, cyclone warnings, and wind vectors on Leaflet GIS.
-- [ ] **SMS / WhatsApp Emergency Webhook**: Integrate Twilio or WhatsApp Business API to allow citizens without internet access to send SOS text messages that auto-populate into the incident grid.
-- [ ] **Offline PWA Support**: Add service workers and manifest for progressive web app functionality, allowing offline access to safety checklists and emergency hotlines during grid failures.
-- [ ] **Cloud Deployment**: Finalize Neon PostgreSQL database connection and deploy using the existing `render.yaml` blueprint.
+For full deployment instructions, see [PROJECT_DOCUMENTATION.md](file:///d:/disaster-management-system-main/disaster-management-system-main/PROJECT_DOCUMENTATION.md).
 
 ---
 
-## 📜 License
+## 📜 Emergency Disclaimer
 
-This project is developed for educational and disaster response operational purposes.
+RakshaBot and this platform deliver situational awareness, civil defense guidance, and provisional heuristic risk scores based on real-time telemetry. They do not replace official emergency dispatchers, civil defense orders, or statutory evacuation mandates. In any life-threatening emergency, always contact national emergency services (**112** in India or your local equivalent) immediately.

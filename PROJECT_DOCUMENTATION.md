@@ -1,536 +1,396 @@
-# 🌍 AI Disaster Operations & Response Management System
-## Comprehensive Project Documentation & Technical Architecture Report
+# 🌍 AI Disaster Operations & Intelligent Incident Management Platform
+## Comprehensive Technical Architecture & Engineering Documentation
 
 ---
 
 ## 📑 Table of Contents
-1. [Executive Summary](#1-executive-summary)
-2. [System Architecture & Workflow](#2-system-architecture--workflow)
-3. [Technology Stack](#3-technology-stack)
-4. [Project Directory Structure](#4-project-directory-structure)
-5. [Core Features & Modules Implemented](#5-core-features--modules-implemented)
-   - [5.1 Interactive GIS Spatial Map & Threat Visualization](#51-interactive-gis-spatial-map--threat-visualization)
-   - [5.2 Autonomous Geocoding & Coordinate Resolution Engine](#52-autonomous-geocoding--coordinate-resolution-engine)
-   - [5.3 AI Operations & Crisis Intelligence Grid](#53-ai-operations--crisis-intelligence-grid)
-   - [5.4 Incident Reporting & Operations Management](#54-incident-reporting--operations-management)
-   - [5.5 Official SitRep PDF & CSV Export Engine](#55-official-sitrep-pdf--csv-export-engine)
-   - [5.6 Relief Hubs & Training Centers Management](#56-relief-hubs--training-centers-management)
-   - [5.7 Preparedness Training Programs & Relational Enrollment](#57-preparedness-training-programs--relational-enrollment)
-   - [5.8 Safety Preparedness & Checklist Engine](#58-safety-preparedness--checklist-engine)
-   - [5.9 Emergency SOS & Rapid GPS Dispatch](#59-emergency-sos--rapid-gps-dispatch)
-   - [5.10 Real-Time Alert Notification System](#510-real-time-alert-notification-system)
-   - [5.11 Authentication & Role-Based Access Control (RBAC)](#511-authentication--role-based-access-control-rbac)
-   - [5.12 Modern Glassmorphism UI & Non-Blocking Validation](#512-modern-glassmorphism-ui--non-blocking-validation)
-6. [Database Schema & Data Models](#6-database-schema--data-models)
-7. [API Specifications & Endpoint Reference](#7-api-specifications--endpoint-reference)
-8. [Implementation & Execution Walkthrough](#8-implementation--execution-walkthrough)
-9. [Default Seed Credentials & Test Accounts](#9-default-seed-credentials--test-accounts)
-10. [Production Deployment Architecture](#10-production-deployment-architecture)
-11. [Verification & System Health Status](#11-verification--system-health-status)
-12. [Recent Progress Milestones & Continuation Roadmap](#12-recent-progress-milestones--continuation-roadmap)
+1. [Executive Overview](#1-executive-overview)
+2. [High-Level System Architecture](#2-high-level-system-architecture)
+3. [Phased Feature Implementations (Phases 1 – 8.1)](#3-phased-feature-implementations-phases-1--81)
+   - [3.1 Phase 1 & 2: Core Platform, RBAC, GIS Mapping & Geocoding](#31-phase-1--2-core-platform-rbac-gis-mapping--geocoding)
+   - [3.2 Phase 3: AI Triage, Voice SOS Extraction & Damage NLP](#32-phase-3-ai-triage-voice-sos-extraction--damage-nlp)
+   - [3.3 Phase 4: Automated GDACS Global Disaster Feed Collector](#33-phase-4-automated-gdacs-global-disaster-feed-collector)
+   - [3.4 Phase 5: Citizen Community Reports & Verification Workflow](#34-phase-5-citizen-community-reports--verification-workflow)
+   - [3.5 Phase 6: Live Meteorological Telemetry & Explainable Risk Engine](#35-phase-6-live-meteorological-telemetry--explainable-risk-engine)
+   - [3.6 Phase 7: Safe-Route Guidance Corridor & Hazard Intersect Engine](#36-phase-7-safe-route-guidance-corridor--hazard-intersect-engine)
+   - [3.7 Phase 8 & 8.1: RakshaBot Real-Time AI Assistant & Grounded Fallback Engine](#37-phase-8--81-rakshabot-real-time-ai-assistant--grounded-fallback-engine)
+4. [Database Architecture & Entity Models](#4-database-architecture--entity-models)
+5. [Complete REST API Reference](#5-complete-rest-api-reference)
+6. [Security, Authentication & Authorization](#6-security-authentication--authorization)
+7. [Render Cloud Deployment Architecture](#7-render-cloud-deployment-architecture)
+8. [Database Migration & Persistence Strategy](#8-database-migration--persistence-strategy)
+9. [Verification, Health Checks & Testing](#9-verification-health-checks--testing)
 
 ---
 
-## 1. Executive Summary
+## 1. Executive Overview
 
-The **AI Disaster Operations & Response Management System** is an end-to-end mission-critical emergency coordination platform. Developed to bridge the gap between real-time crisis reporting, automated situational awareness, resource coordination, and citizen safety, the platform integrates **FastAPI**, **React 19 (Vite)**, **Leaflet GIS Spatial Mapping**, and **AI Triage Automation**.
+The **AI Disaster Operations & Intelligent Incident Management Platform** is a full-stack, enterprise-grade incident coordination and civil defense platform. Engineered to operate under high-stress conditions, it bridges the gap between chaotic on-the-ground disaster reporting, automated meteorological telemetry, algorithmic risk evaluation, and citizen emergency assistance.
 
-### Key Mission Objectives:
-- **Instant Situational Awareness**: Real-time visualization of natural disasters (floods, fires, earthquakes, cyclones, landslides) with danger radius zones on an interactive GIS map.
-- **Autonomous Location Intelligence**: Built-in 300+ district coordinate mapping across Indian states providing automated latitude/longitude lookup with manual GIS overrides.
-- **AI-Driven Triage & Damage Assessment**: Automated classification of disaster damage severity, extraction of structured incident parameters from voice SOS messages, and 24/7 AI tactical copilot guidance.
-- **Inter-Agency Coordination**: Role-based access control (Admin, Trainer, Participant) ensuring authorized resource allocation, training center shelter coordination, and disaster lifecycle tracking.
-- **Auditable Incident Records**: One-click generation of official PDF Situation Reports (SitRep) conforming to national emergency response standards.
+### Core Capabilities:
+- **Spatial GIS Command Center**: Real-time crisis tracking on an interactive Leaflet map with multi-tier threat buffers and relief center pins.
+- **Automated Data Ingestion**: Background polling of global alerts from the Global Disaster Alert and Coordination System (GDACS).
+- **Explainable Risk Assessment**: Heuristic, physics-grounded risk scoring (`PROVISIONAL_RULE_BASED_v1.0`) powered by Open-Meteo real-time atmospheric data.
+- **Evacuation Route Guidance**: Safe-route corridor calculation with active hazard proximity alerts.
+- **RakshaBot (रक्षाBot)**: An intelligent conversational safety assistant powered by Google Gemini, equipped with multi-intent classification and a data-grounded fallback engine.
 
 ---
 
-## 2. System Architecture & Workflow
+## 2. High-Level System Architecture
 
-The platform follows a decoupled, service-oriented client-server architecture with asynchronous communication, RESTful APIs, and persistent relational data storage.
+The platform uses a decoupled, asynchronous client-server architecture:
 
 ```mermaid
 graph TD
-    subgraph Client ["Frontend (React 19 + Vite :5173)"]
-        UI[Command Center UI / Glassmorphism]
-        Router[React Router v7 Protected Routes]
-        GIS[Leaflet GIS Spatial Engine]
-        GeoClient[Frontend GeoResolver 300+ Districts]
-        AxiosClient[Axios API Client + JWT Interceptors]
-        PDFEng[jsPDF / AutoTable Engine]
+    subgraph Client ["Frontend: React 19 + Vite (Port 5173)"]
+        UI[Command Center Dashboard]
+        GIS[Leaflet GIS Spatial Map]
+        RakshaUI[RakshaBot Floating Panel]
+        RouteUI[Safe-Route Corridor Finder]
+        Axios[Axios Client with JWT Interceptor]
     end
 
-    subgraph Server ["Backend (FastAPI Asynchronous ASGI :8080)"]
-        FastAPIApp[FastAPI Core Engine]
-        CORS[CORS Middleware]
-        Security[JWT Bearer & Bcrypt Hashing]
-        GeoServer[Backend GeoResolver Engine]
+    subgraph Backend ["Backend: FastAPI Asynchronous ASGI (Port 8080)"]
+        FastAPI[FastAPI Gateway]
+        Security[JWT Verification & RBAC Guards]
         
-        subgraph Routers ["API Routers (/api)"]
-            AuthR["/auth (Register / Login)"]
-            DashR["/dashboard (Stats / Feeds)"]
-            DisasterR["/disasters (CRUD / Spatial)"]
-            CenterR["/training-centers (Shelters / Hubs)"]
-            ProgR["/training-programs (Courses)"]
-            UsersR["/users (RBAC Management)"]
-            AIR["/ai (Damage NLP / Voice SOS / Copilot)"]
-            SafetyR["/safety (Hotlines / Checklists)"]
+        subgraph Services ["Platform Intelligence Services"]
+            RakshaSvc[RakshaBot Service & Gemini Client]
+            RiskSvc[Provisional Risk Engine v1.0]
+            WeatherSvc[Open-Meteo Weather Service]
+            RouteSvc[OSRM Route & Buffer Scanner]
+            GeoSvc[District GeoResolver & Haversine]
+            GDACSSvc[GDACS Ingestion Collector]
+        end
+        
+        subgraph Routers ["FastAPI API Routers"]
+            AuthR["/api/auth"]
+            DisasterR["/api/disasters"]
+            ReportR["/api/community-reports"]
+            RouteR["/api/routes"]
+            AIR["/api/ai (Chat & Copilot)"]
+            CenterR["/api/training-centers"]
+            ProgR["/api/training-programs"]
+            SafetyR["/api/safety"]
+            NotifR["/api/notifications"]
         end
         
         ORM[SQLAlchemy 2.0 ORM]
     end
 
-    subgraph Storage ["Database Layer"]
-        SQLite[(SQLite Local Default: disaster.db)]
-        PostgreSQL[(PostgreSQL / Neon Cloud Ready)]
+    subgraph DataLayer ["Data & External Providers"]
+        DB[(SQLite Local / PostgreSQL Neon)]
+        GeminiAPI[Google Gemini 2.5 Flash]
+        OpenMeteo[Open-Meteo API]
+        GDACSFeed[GDACS Global RSS/JSON Feed]
+        OSRMAPI[OSRM Project Driving API]
     end
 
-    UI --> Router
-    Router --> GIS
-    Router --> PDFEng
-    Router --> GeoClient
-    Router --> AxiosClient
-    AxiosClient -->|Bearer JWT HTTP Requests| CORS
-    CORS --> FastAPIApp
-    FastAPIApp --> Security
-    FastAPIApp --> Routers
-    DisasterR --> GeoServer
-    CenterR --> GeoServer
-    Routers --> ORM
-    ORM --> SQLite
-    ORM -.-> PostgreSQL
+    UI --> Axios
+    RakshaUI --> Axios
+    RouteUI --> Axios
+    GIS --> Axios
+    
+    Axios -->|Bearer JWT HTTP Requests| FastAPI
+    FastAPI --> Security
+    Security --> Routers
+    
+    Routers --> Services
+    Services --> ORM
+    ORM --> DB
+    
+    RakshaSvc --> GeminiAPI
+    WeatherSvc --> OpenMeteo
+    GDACSSvc --> GDACSFeed
+    RouteSvc --> OSRMAPI
 ```
 
 ---
 
-## 3. Technology Stack
+## 3. Phased Feature Implementations (Phases 1 – 8.1)
 
-### Frontend Architecture
-| Layer / Tool | Technology | Version | Purpose |
-| :--- | :--- | :--- | :--- |
-| **Framework** | React.js | `^19.2.7` | High-performance reactive UI rendering |
-| **Build Tool** | Vite | `^8.1.0` | Ultra-fast HMR and production bundling |
-| **Routing** | React Router DOM | `^7.18.0` | Dynamic client-side routing & protected route guard |
-| **Mapping & GIS** | Leaflet & React-Leaflet | `^1.9.4` / `^5.0.0` | Interactive map tiles, circle buffers, custom SVG markers |
-| **Geocoding** | Built-in GeoRegistry | Custom JS Module | 300+ Indian district to coordinate resolution |
-| **Icons & Visuals** | Lucide React & React Icons | `^1.23.0` / `^5.7.0` | Clean, modern operational iconography |
-| **Data Analytics** | Recharts | `^3.9.2` | Responsive visual charts (Pie, Bar, Area charts) |
-| **CSS & Design** | Custom CSS + Bootstrap | `^5.3.8` | Glassmorphism, dark command center theme, responsive grid |
-| **Report Generation** | jsPDF & jsPDF-AutoTable | `^4.2.1` / `^5.0.8` | Client-side official PDF SitRep compilation |
-| **HTTP Client** | Axios | `^1.18.1` | Asynchronous REST calls with auto token injection |
+### 3.1 Phase 1 & 2: Core Platform, RBAC, GIS Mapping & Geocoding
+- **Entity Management**: CRUD operations for Disasters, Training Centers, and Training Programs.
+- **Role-Based Access Control (RBAC)**: Enforced via JWT tokens and bcrypt salted hashes:
+  - `ADMIN`: Full administrative privileges, user role assignment, report moderation.
+  - `TRAINER`: Operational incident logging, course creation, responder verification.
+  - `PARTICIPANT`: Citizen incident submission, interactive checklists, RakshaBot assistance.
+- **Autonomous Geocoding (`geo_resolver`)**: Built-in 300+ district coordinate lookup covering all Indian states and Union Territories, with manual latitude/longitude override support.
+- **Interactive Leaflet Map**: Severity buffers (LOW: 8 km, MEDIUM: 14 km, HIGH: 22 km) rendered around active incidents.
 
-### Backend Architecture
-| Layer / Tool | Technology | Version | Purpose |
-| :--- | :--- | :--- | :--- |
-| **API Engine** | FastAPI | `^0.115.0` | High-speed asynchronous Python ASGI REST framework |
-| **ASGI Server** | Uvicorn & Gunicorn | `^0.30.0` / `^22.0.0` | Production asynchronous web server |
-| **ORM / Data Access** | SQLAlchemy | `^2.0.0` | Declarative relational database ORM |
-| **Data Validation** | Pydantic v2 | `^2.8.0` | Strict type validation, serialization, and OpenAPI schemas |
-| **Authentication** | python-jose & passlib | `^3.3.0` / `^1.7.4` | JWT token encoding/decoding & bcrypt password hashing |
-| **Form & File Handling**| python-multipart | `^0.0.9` | Multipart file upload and form parsing for AI multimodal |
-| **Geocoding Engine** | Regex / Dictionary Registry | Custom Python Module | Server-side location coordinate resolution fallback |
-| **Database** | SQLite / psycopg2-binary | `^2.9.9` | SQLite zero-config local engine, PostgreSQL cloud driver |
+### 3.2 Phase 3: AI Triage, Voice SOS Extraction & Damage NLP
+- **Multimodal Damage Assessment**: Heuristic and NLP analysis of incident descriptions and images, suggesting severity, hazards, and recommended rescue teams (USAR, Swiftwater, Hazmat).
+- **Voice SOS Incident Extractor**: Extracts structured incident parameters (disaster type, district, severity, urgency) from raw distress audio transcripts.
+- **24/7 Command Copilot**: Automated responses providing first-aid instructions and shelter capacity lookups.
 
----
+### 3.3 Phase 4: Automated GDACS Global Disaster Feed Collector
+- **Asynchronous Background Ingestion**: [backend/gdacs_collector.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/gdacs_collector.py) polls the Global Disaster Alert and Coordination System feed at configurable intervals (`GDACS_POLL_INTERVAL_SECONDS=300`).
+- **Idempotent Upserting**: [backend/disaster_upsert.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/disaster_upsert.py) identifies existing records by GDACS event ID or coordinate/date hashes, updating severity and metrics without creating duplicate entries.
 
-## 4. Project Directory Structure
+### 3.4 Phase 5: Citizen Community Reports & Verification Workflow
+- **Crowdsourced Intelligence**: Endpoints at `/api/community-reports` allow citizens to submit field observations (e.g., local waterlogging, blocked roads).
+- **Verification Workflow**: Submitted reports enter `PENDING` status. Only authenticated `TRAINER` (Responders) or `ADMIN` users can inspect, attach verification notes, and mark reports as `VERIFIED` or `REJECTED`.
+- **Feed Integration**: Verified community reports automatically feed into spatial map layers and RakshaBot proximity scans.
 
-```text
-disaster-management-system/
-├── backend/
-│   ├── data/
-│   │   └── disaster.db               # Local SQLite operational database
-│   ├── routers/
-│   │   ├── ai.py                     # AI Multimodal damage, Voice SOS, and Copilot triage
-│   │   ├── auth.py                   # User registration and JWT login
-│   │   ├── dashboard.py              # Aggregated metrics and recent activity feeds
-│   │   ├── disasters.py              # Incident lifecycle, CRUD, filtering & search
-│   │   ├── safety.py                 # Emergency directory, checklists, guidelines
-│   │   ├── training_centers.py       # Relief shelter hubs & coordinator contact
-│   │   ├── training_programs.py      # Community preparedness training sessions
-│   │   └── users.py                  # User management and role modification
-│   ├── database.py                   # Engine configuration, session management, pooling
-│   ├── geo_resolver.py               # 300+ Indian district coordinates resolver engine
-│   ├── main.py                       # FastAPI entrypoint, CORS configuration, lifecycle
-│   ├── models.py                     # SQLAlchemy ORM entity models
-│   ├── requirements.txt              # Backend Python dependencies
-│   ├── run.py                        # Uvicorn launcher (Port 8080)
-│   ├── schemas.py                    # Pydantic schemas (Request/Response validation)
-│   ├── security.py                   # Password hashing, JWT token verification, RBAC guard
-│   ├── seed.py                       # Initial seeding dataset (Admin, Trainer, Sample data)
-│   └── .env                          # Local environment variables
-│
-├── frontend/
-│   ├── public/                       # Static public assets
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── AlertBanner.jsx       # Real-time incident banner ticker
-│   │   │   ├── Counter.jsx           # Animated stat numbers
-│   │   │   ├── DashboardCard.jsx     # Overview analytical metric cards
-│   │   │   ├── DashboardCharts.jsx   # Severity and district distribution charts
-│   │   │   ├── DisasterMap.jsx       # Leaflet interactive GIS spatial map
-│   │   │   ├── LoadingSpinner.jsx    # Accessible loading indicators
-│   │   │   ├── Navbar.jsx            # Top navigation bar with active SOS trigger
-│   │   │   ├── NotificationDropdown.jsx # Real-time alerts notification popover
-│   │   │   ├── ProtectedRoute.jsx    # Role-based route authorization guard
-│   │   │   ├── Sidebar.jsx           # Command center navigation drawer
-│   │   │   └── SOSModal.jsx          # Emergency hotline & GPS location copier
-│   │   ├── layouts/
-│   │   │   └── MainLayout.jsx        # Shell layout integrating Navbar, Sidebar, and Ticker
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx         # Executive command dashboard with live feeds
-│   │   │   ├── Disasters.jsx         # Incident grid, filter engine, modal form, export
-│   │   │   ├── Login.jsx             # Secure authentication portal
-│   │   │   ├── NotFound.jsx          # Custom 404 error page
-│   │   │   ├── Register.jsx          # New user registration portal
-│   │   │   ├── SafetyPreparedness.jsx# Interactive checklists, guidelines, protocols
-│   │   │   ├── TrainingCenters.jsx   # Relief shelter & center management
-│   │   │   ├── TrainingPrograms.jsx  # Preparedness courses & relational enrollment
-│   │   │   └── Users.jsx             # Admin user administration table
-│   │   ├── services/
-│   │   │   ├── api.js                # Axios client with JWT interceptors
-│   │   │   ├── authService.js        # Auth API calls
-│   │   │   ├── disasterService.js    # Disasters API calls
-│   │   │   ├── safetyService.js      # Safety API calls
-│   │   │   ├── trainingCenterService.js # Relief center API calls
-│   │   │   ├── trainingProgramService.js# Training program API calls
-│   │   │   └── userService.js        # User management API calls
-│   │   ├── styles/                   # Modular CSS stylesheets
-│   │   ├── utils/
-│   │   │   ├── geoResolver.js        # Frontend Indian districts coordinate registry
-│   │   │   └── reportGenerator.js    # jsPDF SitRep and CSV exporter
-│   │   ├── App.jsx                   # Application routing and route definitions
-│   │   ├── index.css                 # Global styling and CSS tokens
-│   │   └── main.jsx                  # React DOM root mounting
-│   ├── package.json                  # NPM packages & scripts
-│   └── vite.config.js                # Vite build and proxy configuration
-│
-├── .gitignore                        # Git ignore rules
-├── render.yaml                       # Cloud infrastructure blueprint for Render
-├── README.md                         # Project overview and quickstart guide
-└── PROJECT_DOCUMENTATION.md          # Comprehensive technical report
-```
+### 3.5 Phase 6: Live Meteorological Telemetry & Explainable Risk Engine
+- **Open-Meteo Integration**: [backend/weather_service.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/weather_service.py) fetches live physical observations (temperature, relative humidity, precipitation rate, wind speed, gusts) using exact coordinates.
+- **Explainable Provisional Risk Engine**: [backend/risk_service.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/risk_service.py) evaluates `PROVISIONAL_RULE_BASED_v1.0`:
+  - Deterministically evaluates atmospheric thresholds against specific disaster hazards (e.g., precipitation > 25 mm/h or sustained winds > 50 km/h).
+  - Produces a risk score (0–100) and category (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
+  - **Regulatory Safety Notice**: Explicitly states that statistical probability is `NULL` and that heuristic scores do not guarantee route safety or replace official civil defense evacuation orders.
+
+### 3.6 Phase 7: Safe-Route Guidance Corridor & Hazard Intersect Engine
+- **OSRM Road Network Routing**: [backend/routing_service.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/routing_service.py) computes driving trajectories between origin and destination coordinates via the OSRM public routing API (with straight-line geodesic fallback if OSRM is unreachable).
+- **Corridor Hazard Scanner**: Downsamples the polyline route into equidistant checkpoint samples and scans for active disaster records and verified citizen reports within a configurable buffer radius (5–50 km).
+- **Safety Advisory Classification**: Marks corridors as `CLEAR`, `ADVISORY`, `MODERATE_PROXIMITY`, or `CRITICAL_PROXIMITY` depending on hazard distance.
+
+### 3.7 Phase 8 & 8.1: RakshaBot Real-Time AI Assistant & Grounded Fallback Engine
+- **Primary AI Provider**: Google Gemini API (`gemini-2.5-flash-lite` and `gemini-2.5-flash`).
+- **Prompt Grounding**: Every prompt is dynamically augmented with live database records, GDACS feeds, Open-Meteo telemetry, and NDMA guidelines.
+- **Intent Discrimination**: Categorizes user questions into 6 distinct intents:
+  1. `SAFETY_GUIDANCE`: Action steps, evacuation protocols, 72-hour survival kit items.
+  2. `TRAINING_AND_RELIEF`: Active courses, trainer details, relief shelter capacities.
+  3. `WEATHER_AND_RISK`: Open-Meteo current observations and provisional risk metrics.
+  4. `LOCATION_INCIDENTS`: Proximity search for disasters near a specific city/district.
+  5. `GLOBAL_INCIDENTS_OVERVIEW`: Overall counts of active crises monitored worldwide.
+  6. `GENERAL`: Standard civil defense and emergency helpline directory.
+- **Quota & Rate-Limiting Protection (HTTP 429)**:
+  - In-memory sliding-window limiter (15 requests/minute per user).
+  - 7.0-second bounded request timeout per Gemini model.
+  - Active 60-second cooldown on HTTP 429 to prevent stalled sequential retries.
+- **Grounded Direct Telemetry Fallback**: If Gemini is rate-limited, unavailable, or times out, the backend generates an intent-specific, data-grounded response directly from active database records and NDMA guidelines.
+- **Frontend Architecture**:
+  - Minimizable floating panel with custom launcher chip.
+  - Functional state updaters (`setMessages(prev => [...prev, ...])`) preventing closure race conditions.
+  - Synchronized session history via `sessionStorage`.
 
 ---
 
-## 5. Core Features & Modules Implemented
+## 4. Database Architecture & Entity Models
 
-### 5.1 Interactive GIS Spatial Map & Threat Visualization
-- **Live Tile Rendering**: Uses Leaflet and OpenStreetMap tiles with high-contrast tactical dark styling.
-- **Dynamic Threat Buffers**: Generates semi-transparent danger circles around incidents based on severity:
-  - **HIGH Severity**: 22 km danger radius with pulsed red marker animations.
-  - **MEDIUM Severity**: 14 km caution radius with amber warning pins.
-  - **LOW Severity**: 8 km monitored radius with green pins.
-- **Relief Center Spatial Pins**: Relief hubs and training centers are mapped concurrently with distinct blue shelter icons and capacity indicators.
-- **Map Controls**: Layer toggling (All, Incidents Only, Centers Only), severity filters, and auto-zoom centering.
+The schema is defined in [backend/models.py](file:///d:/disaster-management-system-main/disaster-management-system-main/backend/models.py) using SQLAlchemy 2.0 ORM:
 
-### 5.2 Autonomous Geocoding & Coordinate Resolution Engine
-- **Cross-Platform Coordinate Engine**:
-  - Implemented in Python (`backend/geo_resolver.py`) and JavaScript (`frontend/src/utils/geoResolver.js`).
-  - Covers 300+ Indian districts across Himachal Pradesh, Uttarakhand, Tamil Nadu, Kerala, Karnataka, Maharashtra, Gujarat, Delhi, Uttar Pradesh, West Bengal, and more.
-- **Zero-Friction Incident Reporting**: When operators enter district names (e.g., "Kullu", "Kangra", "Shimla", "Dehradun", "Wayanad"), the system immediately resolves accurate latitude/longitude coordinates automatically.
-- **GIS Coordinate Override**: Direct decimal coordinate input fields (`latitude`, `longitude`) are available on modal dialogs with a live target coordinate badge to allow pinpoint accuracy.
+### 1. `users`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `name` | String(100) | Full user name |
+| `email` | String(120) | Unique, Indexed, Required |
+| `password` | String(255) | Salted Bcrypt password hash |
+| `role` | String(20) | Enum: `ADMIN`, `TRAINER`, `PARTICIPANT` (default: `PARTICIPANT`) |
+| `phone` | String(20) | Optional contact phone number |
+| `alertLocationName` | String(100) | Saved alert zone label (e.g., "Kochi") |
+| `alertLatitude` | Float | Saved alert zone latitude |
+| `alertLongitude` | Float | Saved alert zone longitude |
+| `alertRadiusKm` | Float | Alert proximity radius in km (default: 25.0) |
 
-### 5.3 AI Operations & Crisis Intelligence Grid
-- **Multimodal Damage Assessment (`POST /api/ai/analyze-damage`)**:
-  - Ingests damage descriptions and uploaded incident photos/files.
-  - Uses NLP and heuristic rules to classify disaster type, calculate damage confidence rating, identify critical hazards, and recommend dispatch teams (USAR, Swiftwater Rescue, Hazmat).
-- **Voice SOS Incident Extractor (`POST /api/ai/voice-report`)**:
-  - Translates raw citizen distress speech transcripts into structured JSON incidents, parsing disaster type, detected district, and severity level.
-- **24/7 AI Emergency Copilot (`POST /api/ai/copilot`)**:
-  - Tactical assistant providing live step-by-step first-aid actions, flood/fire survival protocols, and querying the database for nearby operational relief centers.
+### 2. `disasters`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `disasterName` | String(150) | Incident title / event descriptor |
+| `disasterType` | String(50) | `Flood`, `Cyclone`, `Earthquake`, `Fire`, `Landslide`, `Tsunami` |
+| `severity` | String(20) | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` |
+| `district` | String(100) | Administrative district |
+| `location` | String(200) | Detailed sector / landmark description |
+| `latitude` | Float | Geographic latitude |
+| `longitude` | Float | Geographic longitude |
+| `status` | String(20) | `ACTIVE`, `MONITORING`, `RESOLVED` |
+| `source` | String(50) | `MANUAL`, `GDACS`, `CITIZEN` |
+| `description` | Text | Situation remarks |
+| `reportedDate` | DateTime | Initial reporting timestamp |
 
-### 5.4 Incident Reporting & Operations Management
-- **Full Incident Lifecycle**: Supports creating, reading, updating, and resolving disaster events.
-- **Comprehensive Filtering**: Multi-condition filtering by status (`ACTIVE`, `UNDER_CONTROL`, `RESOLVED`), severity (`HIGH`, `MEDIUM`, `LOW`), district, disaster type, and full-text keyword search.
-- **Sorting Options**: Sort by newest, oldest, or highest severity.
+### 3. `community_reports`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `reporterId` | Integer | Foreign Key -> `users.id` |
+| `disasterType` | String(50) | Type of observed incident |
+| `locationName` | String(150) | Location description |
+| `district` | String(100) | District name |
+| `latitude` | Float | Observation latitude |
+| `longitude` | Float | Observation longitude |
+| `severity` | String(20) | `LOW`, `MEDIUM`, `HIGH` |
+| `status` | String(20) | `PENDING`, `VERIFIED`, `REJECTED` |
+| `verificationNotes` | Text | Notes added by inspecting responder |
+| `verifiedByUserId`| Integer | Foreign Key -> `users.id` |
+| `createdAt` | DateTime | Submission timestamp |
 
-### 5.5 Official SitRep PDF & CSV Export Engine
-- **PDF Situation Report (SitRep)**:
-  - Built using `jsPDF` and `jsPDF-AutoTable`.
-  - Professional command header, emergency classification badges, aggregated statistical summaries (Total Incidents, Active Crises, High Severity counts), timestamped audit trail, and formatted incident tables.
-- **CSV Data Export**:
-  - Instant one-click CSV export of filtered incident logs for external GIS or spreadsheet analysis.
+### 4. `training_centers`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `centerName` | String(150) | Facility title |
+| `district` | String(100) | District location |
+| `address` | Text | Full street address |
+| `latitude` | Float | Geocoded latitude |
+| `longitude` | Float | Geocoded longitude |
+| `capacity` | Integer | Shelter occupant capacity |
+| `contactNumber` | String(50) | Station desk emergency contact |
+| `status` | String(20) | `ACTIVE`, `INACTIVE` |
 
-### 5.6 Relief Hubs & Training Centers Management
-- **Shelter Directory**: Monitors relief centers and training hubs across districts.
-- **Capacity & Coordinator Tracking**: Manages center capacity, coordinator contact info, and operational readiness.
-- **Geographic Auto-Tagging**: Relief center addresses auto-resolve to GIS map pins.
+### 5. `training_programs`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `programName` | String(150) | Course title |
+| `description` | Text | Syllabus & preparation overview |
+| `trainerName` | String(100) | Certified instructor name |
+| `durationDays` | Integer | Course duration in days |
+| `maxParticipants`| Integer | Enrollment limit |
+| `trainingCenterId`| Integer | Foreign Key -> `training_centers.id` |
+| `status` | String(20) | `ACTIVE`, `COMPLETED`, `CANCELLED` |
 
-### 5.7 Preparedness Training Programs & Relational Enrollment
-- **Course Scheduling**: Organizes community resilience courses (First Aid, Flood Rescue, Fire Safety).
-- **Relational Center Linking**: Instead of requiring operators to manually type obscure numeric foreign keys, programs are directly linked to designated training centers via an interactive relational dropdown selector (`{centerName} ({district})`).
-- **Participant Registration**: Community members can enroll in programs with status saved persistently in browser storage.
-
-### 5.8 Safety Preparedness & Checklist Engine
-- **Multi-Hazard Preparedness Guides**: Comprehensive guides for Floods, Cyclones, Earthquakes, Fires, Landslides, and Heatwaves.
-- **Phased Action Protocols**: Categorized action steps across **BEFORE**, **DURING**, and **AFTER** a disaster strike.
-- **Interactive Checklists**: Persisted interactive check-off items using browser `localStorage` to help citizens track emergency kit preparations.
-- **Direct Hotline Access**: One-touch national helpline directories with direct click-to-call links.
-
-### 5.9 Emergency SOS & Rapid GPS Dispatch
-- **1-Click GPS Locator**: Fetches device browser geolocation coordinates (`lat`, `lng`, accuracy) and copies them to clipboard for emergency transmission.
-- **Quick Hotline Directory**: Immediate access to Police (100/112), Fire (101), Ambulance (108), Disaster Management Helpline (1077/1070), and Women Helpline (1091).
-
-### 5.10 Real-Time Alert Notification System
-- **Alert Banner Ticker**: Top banner scanning active high-severity incidents across districts to alert operators immediately.
-- **Notification Dropdown**: Popover list of recent events with timestamped badges and mark-as-read capability.
-
-### 5.11 Authentication & Role-Based Access Control (RBAC)
-- **Token-Based Security**: Cryptographically signed JSON Web Tokens (`python-jose`) with HS256 algorithm.
-- **Password Security**: Salted Bcrypt hashing (`passlib[bcrypt]`).
-- **Role Permissions**:
-  - `ADMIN`: Full administrative control across Disasters, Training Centers, Training Programs, and Users management.
-  - `TRAINER`: Incident creation/updates, training program scheduling, and relief center coordination.
-  - `PARTICIPANT`: Read-only access to maps, emergency directories, safety checklists, and AI Copilot assistance.
-- **Client Route Guards**: `ProtectedRoute` component enforcing authentication and matching authorized role lists.
-
-### 5.12 Modern Glassmorphism UI & Non-Blocking Validation
-- **Polished Command Center Aesthetic**: Sleek dark palette with neon status indicators and glassmorphism cards.
-- **Non-blocking Error Banners**: Upgraded form modals across Login, Register, Users, Disasters, Training Centers, and Training Programs to replace intrusive browser `alert()` popups with styled inline error and validation alerts.
-
----
-
-## 6. Database Schema & Data Models
-
-The relational database uses SQLAlchemy ORM mapping to SQLite (`backend/data/disaster.db`) or PostgreSQL.
-
-```mermaid
-erDiagram
-    USERS {
-        int id PK
-        string fullName
-        string email UK
-        string password
-        string phoneNumber
-        string role
-        datetime createdAt
-    }
-
-    DISASTERS {
-        int id PK
-        string disasterName
-        string disasterType
-        string district
-        string location
-        string severity
-        string status
-        text description
-        float latitude
-        float longitude
-        datetime reportedDate
-    }
-
-    TRAINING_CENTERS {
-        int id PK
-        string centerName
-        string district
-        string address
-        int capacity
-        string contactNumber
-        string coordinatorName
-        string status
-        float latitude
-        float longitude
-    }
-
-    TRAINING_PROGRAMS {
-        int id PK
-        string programName
-        string trainerName
-        int durationDays
-        date startDate
-        date endDate
-        int maxParticipants
-        string status
-        text description
-        int trainingCenterId FK
-    }
-
-    TRAINING_CENTERS ||--o{ TRAINING_PROGRAMS : "hosts"
-```
+### 6. `notifications`
+| Column | Type | Constraints / Description |
+| :--- | :--- | :--- |
+| `id` | Integer | Primary Key, Auto-increment |
+| `userId` | Integer | Target user ID (or NULL for system-wide broadcast) |
+| `title` | String(150) | Notification title |
+| `message` | Text | Detailed alert advisory |
+| `severity` | String(20) | `INFO`, `WARNING`, `CRITICAL` |
+| `isRead` | Boolean | Read state indicator |
+| `createdAt` | DateTime | Alert timestamp |
 
 ---
 
-## 7. API Specifications & Endpoint Reference
+## 5. Complete REST API Reference
 
-Base URL: `http://localhost:8080` (Local) / `/api` prefix
+All API routes are served under the `/api` prefix. Interactive Swagger documentation is available at `/docs`.
 
 ### Authentication (`/api/auth`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register a new user account |
-| `POST` | `/api/auth/login` | Public | Login with email & password, returns JWT token |
-| `GET` | `/api/auth/me` | Authenticated | Retrieve current user profile |
+- `POST /api/auth/register` — Register a new user (`PARTICIPANT`).
+- `POST /api/auth/login` — Authenticate credentials; returns signed JWT bearer token.
+- `GET /api/auth/profile` — Fetch authenticated user profile details.
+- `PUT /api/auth/alert-preferences` — Update user GPS alert zone coordinates and radius.
 
-### Dashboard & Analytics (`/api/dashboard`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/dashboard` | Authenticated | Overall statistics (Users, Disasters, Centers, Programs) |
-| `GET` | `/api/dashboard/recent-disasters` | Authenticated | Retrieve 10 most recent reported incidents |
-| `GET` | `/api/dashboard/recent-programs` | Authenticated | Retrieve 10 most recent preparedness programs |
+### Disaster Operations (`/api/disasters`)
+- `GET /api/disasters` — List incidents (supports filtering by `severity`, `status`, `disaster_type`, `district`).
+- `POST /api/disasters` — Log a new disaster (`ADMIN` or `TRAINER`).
+- `GET /api/disasters/{id}` — Get single incident details.
+- `PUT /api/disasters/{id}` — Update incident attributes (`ADMIN` or `TRAINER`).
+- `DELETE /api/disasters/{id}` — Remove an incident (`ADMIN` only).
+- `GET /api/disasters/{id}/weather` — Fetch live Open-Meteo weather for incident coordinates.
+- `GET /api/disasters/{id}/risk-assessment` — Calculate explainable provisional risk for incident coordinates.
+- `GET /api/disasters/gdacs/status` — Get GDACS background feed collector synchronization status.
 
-### Disasters Operations (`/api/disasters`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/disasters` | Authenticated | Filtered query of incidents (search, severity, status, district) |
-| `GET` | `/api/disasters/{id}` | Authenticated | Get incident by ID |
-| `POST` | `/api/disasters` | Admin, Trainer | Create a new disaster report (with auto-geocoding) |
-| `PUT` | `/api/disasters/{id}` | Admin, Trainer | Update an existing disaster report |
-| `DELETE` | `/api/disasters/{id}` | Admin | Delete a disaster record |
+### Community Reports (`/api/community-reports`)
+- `GET /api/community-reports` — List community citizen reports.
+- `POST /api/community-reports` — Submit crowdsourced distress report (`PARTICIPANT`).
+- `PUT /api/community-reports/{id}/status` — Verify or reject report (`TRAINER` or `ADMIN`).
 
-### Training Centers (`/api/training-centers`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/training-centers` | Authenticated | List all relief centers & training hubs |
-| `GET` | `/api/training-centers/{id}` | Authenticated | Get training center details |
-| `POST` | `/api/training-centers` | Admin, Trainer | Create a new training/relief center |
-| `PUT` | `/api/training-centers/{id}` | Admin, Trainer | Update training center details |
-| `DELETE` | `/api/training-centers/{id}` | Admin | Delete a training center |
+### Safe Routes (`/api/routes`)
+- `POST /api/routes/safe-route` — Compute driving route, scan active hazards in corridor buffer, and return safety advisory.
+
+### AI Operations & RakshaBot (`/api/ai`)
+- `POST /api/ai/chat` — Primary RakshaBot conversational endpoint (authenticated, rate-limited, grounded in live telemetry).
+- `POST /api/ai/rakshabot` — Direct alias for `/api/ai/chat`.
+- `POST /api/ai/analyze-damage` — Multimodal damage classification and rescue team dispatch suggestion.
+- `POST /api/ai/voice-report` — Structured incident parameter extraction from distress speech transcripts.
+- `POST /api/ai/copilot` — 24/7 incident copilot triage assistant.
+- `POST /api/ai/risk-assessment` — On-demand explainable risk assessment for coordinates.
+
+### Training Centers & Shelters (`/api/training-centers`)
+- `GET /api/training-centers` — List registered relief shelters and centers.
+- `POST /api/training-centers` — Register a new shelter center (`ADMIN`).
+- `PUT /api/training-centers/{id}` — Update shelter details (`ADMIN`).
+- `DELETE /api/training-centers/{id}` — Delete shelter record (`ADMIN`).
 
 ### Training Programs (`/api/training-programs`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/training-programs` | Authenticated | List all community resilience courses |
-| `GET` | `/api/training-programs/{id}`| Authenticated | Get training program details |
-| `POST` | `/api/training-programs` | Admin, Trainer | Schedule a new training program |
-| `PUT` | `/api/training-programs/{id}`| Admin, Trainer | Update a training program |
-| `DELETE` | `/api/training-programs/{id}`| Admin | Delete a training program |
+- `GET /api/training-programs` — List preparedness training programs.
+- `POST /api/training-programs` — Create a training course (`ADMIN` or `TRAINER`).
+- `PUT /api/training-programs/{id}` — Update course attributes (`ADMIN` or `TRAINER`).
+- `DELETE /api/training-programs/{id}` — Delete course record (`ADMIN`).
 
-### AI Operations (`/api/ai`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/ai/analyze-damage` | Authenticated | Multimodal damage severity analysis from text/photo |
-| `POST` | `/api/ai/voice-report` | Authenticated | AI voice SOS transcript to structured incident JSON |
-| `POST` | `/api/ai/copilot` | Authenticated | 24/7 AI Triage Assistant for first-aid & tactical advice |
+### Safety & Emergency Preparedness (`/api/safety`)
+- `GET /api/safety/types` — Catalog of supported disaster safety categories.
+- `GET /api/safety/{disaster_type}` — Comprehensive action checklist (Before, During, After) and emergency kit guide.
+- `GET /api/safety/recommendations` — Intelligent location-specific preparedness recommendations.
+- `GET /api/safety/contacts` — Official national emergency helplines directory.
 
-### Safety & Emergency Directory (`/api/safety`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/safety/types` | Authenticated | List supported disaster safety categories |
-| `GET` | `/api/safety/guidelines/{type}` | Authenticated | Phased Before/During/After emergency protocols |
-| `GET` | `/api/safety/contacts` | Authenticated | National and regional emergency hotline directory |
-
-### User Management (`/api/users`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/users` | Admin | Retrieve all registered users |
-| `GET` | `/api/users/{id}` | Admin | Retrieve specific user details |
-| `PUT` | `/api/users/{id}/role` | Admin | Update user role (`ADMIN`, `TRAINER`, `PARTICIPANT`) |
-| `DELETE` | `/api/users/{id}` | Admin | Remove user account |
+### Notifications (`/api/notifications`)
+- `GET /api/notifications` — Retrieve user alert notifications and unread counter.
+- `PUT /api/notifications/{id}/read` — Mark notification as read.
+- `PUT /api/notifications/read-all` — Mark all notifications as read.
 
 ---
 
-## 8. Implementation & Execution Walkthrough
+## 6. Security, Authentication & Authorization
 
-### How the Environment Was Launched and Verified:
-
-1. **Environment Discovery**:
-   - Python 3.12 / 3.14 compatible environment at `backend/venv`.
-   - Node.js dependencies resolved in `frontend/node_modules`.
-
-2. **Backend Execution**:
-   - Executed via:
-     ```powershell
-     cd backend
-     .\venv\Scripts\python.exe run.py
-     ```
-   - Launched Uvicorn server bound to `http://0.0.0.0:8080`.
-   - Verified `/health` returns `{"status":"HEALTHY","code":200}`.
-   - Database auto-seeded via `seed.py`.
-
-3. **Frontend Execution**:
-   - Executed via:
-     ```powershell
-     cd frontend
-     npm run dev
-     ```
-   - Launched Vite development server listening on `http://localhost:5173`.
-   - Verified HTTP status code 200 via curl test.
+1. **Password Hashing**: User passwords are encrypted using Bcrypt with salted rounds via `passlib[bcrypt]`.
+2. **JWT Authorization**: Requests must provide `Authorization: Bearer <token>`. Signed using `HS256` with expiration windows configured in `ACCESS_TOKEN_EXPIRE_MINUTES`.
+3. **Role Guards**: FastAPI dependencies verify role claims (`security.require_role("ADMIN")`). Unauthorized actions return `HTTP 403 Forbidden`.
+4. **Credential Protection**:
+   - Secrets are loaded exclusively through environment variables.
+   - `.env` is ignored by `.gitignore`.
+   - API keys and tokens are never returned in error responses or client payloads.
+5. **Rate Limiting**: Sliding-window rate limiter prevents request flooding (15 queries per 60 seconds per user on RakshaBot).
 
 ---
 
-## 9. Default Seed Credentials & Test Accounts
+## 7. Render Cloud Deployment Architecture
 
-| Role | Email Address | Password | Permissions & Scope |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@disaster.com` | `admin123` | Full access: CRUD disasters, manage centers, programs, and edit user roles |
-| **Trainer** | `trainer@disaster.com` | `trainer123` | Operational access: Report disasters, schedule training sessions, view maps |
-| **Participant** | `user@disaster.com` | `user123` | Citizen access: View maps, read safety guides, interact with AI Copilot, trigger SOS |
+The repository contains an automated blueprint definition in [render.yaml](file:///d:/disaster-management-system-main/disaster-management-system-main/render.yaml):
 
----
+### Backend Web Service Configuration:
+- **Service Type**: Web Service
+- **Runtime**: `Python 3.11`
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT`
+- **Environment Variables**:
+  - `ENVIRONMENT`: `production`
+  - `DEBUG`: `false`
+  - `DATABASE_URL`: Managed PostgreSQL connection string (Neon or Render Postgres)
+  - `JWT_SECRET_KEY`: Long random secret string
+  - `JWT_ALGORITHM`: `HS256`
+  - `ACCESS_TOKEN_EXPIRE_MINUTES`: `1440`
+  - `GEMINI_API_KEY`: Google AI Studio API key
+  - `FRONTEND_URL`: URL of the deployed frontend static site
+  - `OPEN_METEO_BASE_URL`: `https://api.open-meteo.com/v1/forecast`
+  - `GDACS_FEED_URL`: `https://www.gdacs.org/gdacsapi/api/Events/geteventlist/EVENTS4APP`
+  - `GDACS_POLL_INTERVAL_SECONDS`: `300`
 
-## 10. Production Deployment Architecture
-
-The repository includes a ready-to-deploy **Render Blueprint** (`render.yaml`):
-
-```yaml
-services:
-  # Backend ASGI Service (FastAPI)
-  - type: web
-    name: disaster-backend
-    runtime: python
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT
-    envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: JWT_SECRET_KEY
-        generateValue: true
-      - key: DATABASE_URL
-        sync: false   # Neon / PostgreSQL connection string
-      - key: FRONTEND_URL
-        sync: false   # Deployed Frontend URL
-
-  # Frontend Static Service (React/Vite)
-  - type: web
-    name: disaster-frontend
-    runtime: node
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_BASE_URL
-        sync: false   # Render Backend URL + /api
-```
+### Frontend Static Site Configuration:
+- **Service Type**: Static Site
+- **Runtime**: `Node 20`
+- **Root Directory**: `frontend`
+- **Build Command**: `npm install && npm run build`
+- **Publish Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_BASE_URL`: URL of the deployed backend Web Service + `/api`
+- **SPA Routing**: Single-page application route rewrite handled via `frontend/public/_redirects`.
 
 ---
 
-## 11. Verification & System Health Status
+## 8. Database Migration & Persistence Strategy
 
-| Component | Port / Target | Operational Status | Verified Features |
-| :--- | :--- | :--- | :--- |
-| **Backend API** | `http://localhost:8080` | **HEALTHY / ONLINE** | Auth, Dashboard, Disasters CRUD, AI Endpoints |
-| **Interactive Docs** | `http://localhost:8080/docs`| **ACCESSIBLE** | Interactive OpenAPI / Swagger UI testing suite |
-| **Frontend Application**| `http://localhost:5173` | **HEALTHY / ONLINE** | Reactive UI, GIS Leaflet map, SitRep PDF export, SOS modal |
-| **Database** | `backend/data/disaster.db` | **INITIALIZED** | Multi-table schema with relational constraints & seed data |
-
----
-
-## 12. Recent Progress Milestones & Continuation Roadmap
-
-### 🏁 Milestones Completed
-1. **Autonomous Geocoding Infrastructure**:
-   - Integrated `geo_resolver.py` (backend) and `geoResolver.js` (frontend) with 300+ Indian districts.
-   - Disaster and Training Center creation dynamically auto-calculates spatial coordinates from district or location names.
-   - Added manual GIS coordinate controls and real-time visual coordinate badges on incident dialogs.
-2. **Relational Form Upgrades**:
-   - Transformed Training Programs form from manual numeric foreign key entry to dynamic dropdown selector mapped to existing relief centers.
-   - Integrated persistent registration state using `localStorage`.
-3. **UI / UX Non-Blocking Modernization**:
-   - Modernized error handling across all pages, replacing browser modal `alert()` popups with inline glassmorphic error banners.
-4. **Full-Stack Execution & Verification**:
-   - Backend online on `http://localhost:8080` (FastAPI).
-   - Frontend online on `http://localhost:5173` (React 19 / Vite).
-   - Swagger documentation verified at `http://localhost:8080/docs`.
-
-### 🚀 Future Roadmap & Continuation Tasks
-- **Task 1: Real-Time WebSocket Alerts**: Establish WebSocket channel (`/ws/alerts`) to broadcast newly reported disasters to all active operator consoles in real time without manual page refreshes.
-- **Task 2: Weather & Precipitation Overlay**: Integrate external weather/cyclone data (NOAA or OpenWeather) to project weather radars directly over the Leaflet GIS canvas.
-- **Task 3: Citizen SMS / WhatsApp Ingestion**: Provide an inbound webhook for low-connectivity SMS or WhatsApp incident distress messages.
-- **Task 4: Offline PWA Capabilities**: Add Service Worker caching for offline emergency guide access during severe power or cellular infrastructure disruption.
-- **Task 5: Production Cloud Deployment**: Deploy backend and frontend to Render using `render.yaml` with managed PostgreSQL.
+1. **Local Development (SQLite)**:
+   - Uses `sqlite:///./data/disaster_db.sqlite3`.
+   - Auto-creates tables and seeds default test users and records on startup.
+2. **Production Hosting (PostgreSQL)**:
+   - Render Web Services run on ephemeral disks. Storing SQLite files directly on Render causes data loss upon service restart.
+   - In production, set `DATABASE_URL` to a PostgreSQL connection URI (e.g., `postgresql+psycopg2://USER:PASS@HOST:5432/DB_NAME`).
+   - `psycopg2-binary>=2.9.9` is included in `backend/requirements.txt`.
+   - `models.Base.metadata.create_all(bind=engine)` runs on application startup, creating tables automatically.
 
 ---
 
-*Documentation maintained and up to date with current codebase state.*
+## 9. Verification, Health Checks & Testing
+
+The platform includes dedicated automated verification suites in `backend/`:
+
+1. **System Health Check**:
+   - `GET /health` returns `{ "status": "HEALTHY", "database": "CONNECTED", "timestamp": ... }`.
+2. **RakshaBot Multi-Intent Test (`backend/test_rakshabot_verification.py`)**:
+   - Verifies that queries for live disasters, location proximity, weather/risk, training programs, and safety checklists produce distinct, evidence-grounded answers.
+3. **Fallback Resiliency Test (`backend/test_fallback_verification.py`)**:
+   - Simulates Gemini HTTP 429 quota exhaustion and verifies that all 5 benchmark questions receive question-specific direct telemetry answers.
+4. **Dynamic Database Visibility Test (`backend/test_database_grounded_dynamic.py`)**:
+   - Confirms that newly added database records are immediately retrievable and synthesized by the chatbot without restarting or retraining.
+5. **Critical Services Verification (`backend/test_critical_features_check.py`)**:
+   - Confirms database model integrity, Haversine geo-math, Open-Meteo observations, Risk Engine scoring, and Safe-Route corridor calculations.
+
+---
+
+*This technical documentation serves as the complete operational and architectural manual for the platform.*
